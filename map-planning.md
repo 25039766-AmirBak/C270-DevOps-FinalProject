@@ -10,9 +10,7 @@ We need to finalize which mapping library to use before Phase 4 development begi
 *   **Option A: Leaflet.js + React-Leaflet (Recommended)**
     *   *Pros:* 100% free, open-source, lightweight, no credit card or billing configuration required.
     *   *Cons:* Standard map tiles are basic; requires external plugins for advanced routing features.
-*   **Option B: Google Maps API**
-    *   *Pros:* Industry standard, powerful routing engine, highly accurate Singapore address parsing.
-    *   *Cons:* Requires setting up a Google Cloud billing profile with a credit card.
+
 
 
 ---
