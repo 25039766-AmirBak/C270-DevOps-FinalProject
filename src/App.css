@@ -1,0 +1,79 @@
+.app-shell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 2rem;
+}
+
+.navbar {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f7f7ff;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.navbar a {
+  text-decoration: none;
+  color: #4b3f72;
+  font-weight: 600;
+}
+
+.logout-btn {
+  border: none;
+  background: #c0392b;
+  color: white;
+  padding: 0.45rem 0.8rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.page-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 2rem;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.page-card ul {
+  text-align: left;
+  padding-left: 1.2rem;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.auth-form input {
+  padding: 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.auth-form button {
+  padding: 0.8rem;
+  border: none;
+  border-radius: 8px;
+  background: #6c63ff;
+  color: white;
+  cursor: pointer;
+}
+
+.message {
+  margin-top: 0.8rem;
+  color: #2f7d32;
+}
+
+.error-text {
+  margin: -0.3rem 0 0;
+  color: #c0392b;
+  font-size: 0.9rem;
+  text-align: left;
+}
+
