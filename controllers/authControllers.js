@@ -11,7 +11,7 @@ const generateToken = (user) => {
 
 exports.register = async (req, res, next) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({
@@ -30,7 +30,7 @@ exports.register = async (req, res, next) => {
       name,
       email,
       password,
-      role: role || 'user',
+      role: 'user',
     });
 
     const token = generateToken(user);
@@ -46,6 +46,48 @@ exports.register = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  }
+};
+
+exports.promoteToAdmin = async (req, res) => {
+  try {
+    const userId = req.params.userId || req.params.id;
+
+    if (!userId) {
+      return res.status(400).json({ message: 'User ID is required' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (user.role === 'admin') {
+      return res.status(200).json({
+        message: 'User is already an admin',
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        },
+      });
+    }
+
+    user.role = 'admin';
+    await user.save();
+
+    res.status(200).json({
+      message: 'User promoted to admin successfully',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to promote user', error: error.message });
   }
 };
 
@@ -82,19 +124,17 @@ exports.login = async (req, res, next) => {
   }
 };
 
-exports.getProfile = async (req, res, next) => {
+exports.getProfile = async (req, res) => {
   try {
-    if (!req.user) {
-      return res.status(401).json({
-        message: 'Unauthorized',
-      });
-    }
-
-    const { _id, name, email, role } = req.user;
     res.status(200).json({
-      user: { id: _id, name, email, role },
+      user: {
+        id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        role: req.user.role,
+      },
     });
   } catch (error) {
-    next(error);
+    res.status(500).json({ message: 'Failed to fetch profile', error: error.message });
   }
 };
