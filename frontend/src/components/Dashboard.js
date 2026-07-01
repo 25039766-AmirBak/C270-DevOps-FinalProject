@@ -3,21 +3,18 @@ import InventoryStats from './InventoryStats';
 import DonationTable from './DonationTable';
 
 const Dashboard = () => {
+    // 1. STATE MANAGEMENT
+    // Holds the raw data from the database, the user's dropdown choice, and the loading spinner status
     const [donations, setDonations] = useState([]);
     const [selectedLocation, setSelectedLocation] = useState('All');
     const [isLoading, setIsLoading] = useState(true);
 
+    // 2. LIFECYCLE & DATA FETCHING
+    // Runs automatically when the dashboard first loads on the screen
     useEffect(() => {
-        // =========================================================
-        // --- PHASE 2: LIVE API FETCH (CURRENTLY DORMANT) ---
-        // =========================================================
-        // When Member 3 fixes the firewall, UNCOMMENT this entire block 
-        // and DELETE the mock data block below it.
-        
-        /*
         const fetchLiveInventory = async () => {
             try {
-                // Fetch the live JSON data from Member 3's Express backend
+                // Reach out to the Node.js backend to get the latest MongoDB records
                 const response = await fetch('http://localhost:5000/api/donations');
                 
                 if (!response.ok) {
@@ -26,50 +23,42 @@ const Dashboard = () => {
                 
                 const liveData = await response.json();
                 
-                // Load the real data into the dashboard
+                // Save the data to our state and turn off the loading spinner
                 setDonations(liveData);
                 setIsLoading(false);
                 
             } catch (error) {
                 console.error("Database connection error:", error);
-                // If it fails, stop the loading spinner so the UI doesn't hang forever
+                // Ensure the spinner stops even if the connection fails
                 setIsLoading(false);
             }
         };
         
         fetchLiveInventory();
-        */
-
-        // =========================================================
-        // --- PHASE 1: CURRENT MOCK DATA (DELETE LATER) ---
-        // =========================================================
-        setTimeout(() => {
-            const mockDatabase = [
-                { id: 1, foodName: "Canned Beans", quantity: 50, location: "North District", status: "Available" },
-                { id: 2, foodName: "Rice Sacks (5kg)", quantity: 20, location: "East District", status: "Available" },
-                { id: 3, foodName: "Instant Noodles", quantity: 100, location: "West District", status: "Claimed" },
-                { id: 4, foodName: "Bottled Water", quantity: 200, location: "North District", status: "Available" }
-            ];
-            setDonations(mockDatabase);
-            setIsLoading(false);
-        }, 1500); 
     }, []);
 
+    // 3. DATA PROCESSING & MATH
+    // Extract a unique list of districts from the data to populate the dropdown menu
     const uniqueLocations = ['All', ...new Set(donations.map(item => item.location))];
 
+    // Create a new array containing only the items that match the selected dropdown filter
     const filteredDonations = selectedLocation === 'All'
         ? donations
         : donations.filter(item => item.location === selectedLocation);
 
+    // Isolate only 'Available' items and calculate the sum of their quantities
     const totalAvailableItems = filteredDonations
         .filter(item => item.status === 'Available')
         .reduce((sum, item) => sum + item.quantity, 0);
 
+    // Calculate how full the inventory is based on an arbitrary 500-unit capacity target
     const inventoryCapacity = 500; 
     const fillPercentage = totalAvailableItems > 0 
         ? Math.round((totalAvailableItems / inventoryCapacity) * 100) 
         : 0;
 
+    // 4. CONDITIONAL RENDERING (LOADING STATE)
+    // If data is still being fetched, display this CSS spinner instead of the main dashboard
     if (isLoading) {
         return (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', fontFamily: 'Arial, sans-serif' }}>
@@ -83,10 +72,13 @@ const Dashboard = () => {
         );
     }
 
+    // 5. MAIN UI RENDERING
+    // The actual dashboard interface that renders once the data is ready
     return (
         <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif' }}>
             <h2>System Overview</h2>
             
+            {/* The Dropdown Filter Menu */}
             <div style={{ marginBottom: '20px' }}>
                 <label htmlFor="locationFilter" style={{ marginRight: '10px', fontWeight: 'bold' }}>Filter by Location: </label>
                 <select 
@@ -101,7 +93,7 @@ const Dashboard = () => {
                 </select>
             </div>
             
-            {/* Our clean, imported components do all the visual work! */}
+            {/* The visually modular components we imported at the top */}
             <InventoryStats 
                 filteredDonations={filteredDonations}
                 totalAvailableItems={totalAvailableItems}
