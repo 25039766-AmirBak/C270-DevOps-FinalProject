@@ -1,3 +1,4 @@
+// Verifies JWTs and protects routes that require authentication or admin access.
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 

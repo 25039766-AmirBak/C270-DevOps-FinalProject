@@ -1,4 +1,5 @@
-﻿const express = require('express');
+﻿// Maps authentication-related endpoints to the controller functions.
+const express = require('express');
 const { register, login, getProfile, promoteToAdmin } = require('../controllers/authControllers');
 const authMiddleware = require('../middleware/authMiddleware');
 const { adminMiddleware } = authMiddleware;

@@ -1,3 +1,4 @@
+// Contains the authentication logic for registering users, logging in, and managing profile/admin actions.
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 

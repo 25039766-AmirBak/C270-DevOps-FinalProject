@@ -1,3 +1,4 @@
+// Defines the user schema and password hashing behavior for authentication.
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
