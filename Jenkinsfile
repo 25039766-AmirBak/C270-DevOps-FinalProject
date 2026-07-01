@@ -1,23 +1,36 @@
 pipeline {
     agent any
-    
-    // This block tells Jenkins to load the Node tool
+
+    // Ensures Jenkins uses the stable NodeJS version configured on your server
     tools {
         nodejs 'NodeJS' 
     }
-    
+
     stages {
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
+                // Pulls the latest code from your GitHub repository
                 checkout scm
             }
         }
-        stage('Build Backend') {
+
+        stage('Backend Foundation') {
             steps {
-                // This tells Jenkins to go inside the backend folder first
+                // Steps into the backend folder and installs dependencies
                 dir('backend') {
-                    echo 'Installing backend dependencies...'
                     sh 'npm install'
+                }
+            }
+        }
+        
+        stage('Frontend Compilation') {
+            steps {
+                // Steps into your new React folder
+                dir('frontend') {
+                    // Installs the required React packages
+                    sh 'npm install'
+                    // Compiles the dashboard into a highly efficient production build
+                    sh 'npm run build'
                 }
             }
         }
