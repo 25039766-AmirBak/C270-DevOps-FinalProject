@@ -1,3 +1,11 @@
+// --- NODE ENVIRONMENT POLYFILL ---
+// Forces the crypto module into the global scope for MongoDB compatibility
+const crypto = require('crypto');
+if (!globalThis.crypto) {
+    globalThis.crypto = crypto;
+}
+
+
 // 1. Import libraries
 const express = require("express");
 const mongoose = require("mongoose");
