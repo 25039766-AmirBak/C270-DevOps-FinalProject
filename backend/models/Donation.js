@@ -1,37 +1,39 @@
 const mongoose = require("mongoose");
 
-
-const donationSchema = new mongoose.Schema({
-
+const donationSchema = new mongoose.Schema(
+  {
     foodName: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
+      trim: true
     },
 
     quantity: {
-        type: Number,
-        required: true
+      type: Number,
+      required: true,
+      min: 1
     },
 
     location: {
-        type: String,
-        required: true
+      type: String,
+      required: true,
+      trim: true
     },
 
     expiryDate: {
-        type: Date,
-        required: true
+      type: Date,
+      required: true
     },
 
     status: {
-        type: String,
-        default: "Available"
+      type: String,
+      enum: ["Available", "Requested", "Picked Up"],
+      default: "Available"
     }
-
-});
-
-
-module.exports = mongoose.model(
-    "Donation",
-    donationSchema
+  },
+  {
+    timestamps: true
+  }
 );
+
+module.exports = mongoose.model("Donation", donationSchema);
