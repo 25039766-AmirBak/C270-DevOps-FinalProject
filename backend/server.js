@@ -1,12 +1,11 @@
-// Temporary compatibility fix:
-// Some older Node.js environments may not expose crypto globally.
-// Docker will standardise the runtime using Node 22.
-const crypto = require("crypto");
-
+// --- NODE ENVIRONMENT POLYFILL ---
+// Forces the crypto module into the global scope for MongoDB compatibility
+const crypto = require('crypto');
 if (!globalThis.crypto) {
-  globalThis.crypto = crypto;
+    globalThis.crypto = crypto;
 }
 
+// 1. Import libraries
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
