@@ -12,12 +12,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
-      trim: true
+      lowercase:true,
+      trim: true,
     },
 
     passwordHash: {
       type: String,
-      required: true
+      required: true,
+      minlength:8
     },
 
     role: {
