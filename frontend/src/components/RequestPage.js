@@ -87,20 +87,111 @@ const RequestPage = () => {
     }
 
     return (
-        <div
-            style={{
-                maxWidth: "1000px",
-                margin: "30px auto",
-                padding: "20px",
-                fontFamily: "Arial, sans-serif"
-            }}
-        >
+            <div
+                style={{
+                    backgroundColor: "#f5f7f6",
+                    minHeight: "100vh",
+                }}
+            >
+            
             {/* Header */}
-            <div style={{ textAlign: "center" }}>
-                <h1>SharePlate Food Request Portal</h1>
+            <nav
+                style={{
+                    backgroundColor: "#2E7D32",
+                    color: "white",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "15px 30px",
+                    marginBottom: "40px"
+                }}
+            >
+                {/* Logo */}
+                <div
+                    style={{
+                        fontSize: "30px",
+                        fontWeight: "bold"
+                    }}
+                >
+                    <a
+                        href="/"
+                        style={{
+                            textDecoration: "none",
+                            color: "white"
+                        }}
+                    >
+                        SharePlate
+                    </a>
+                </div>
 
-                <p style={{ color: "#666" }}>
-                    Browse available food donations and submit a request.
+                {/* Navigation */}
+                <div
+                    style={{
+                        display: "flex",
+                        gap: "30px",
+                        fontSize: "16px"
+                    }}
+                >
+                    <a href="/" style={{ color: "white", textDecoration: "none" }}>
+                        Home
+                    </a>
+
+                    <a href="/donate" style={{ color: "white", textDecoration: "none" }}>
+                        Donate
+                    </a>
+
+                    <a
+                        href="/request"
+                        style={{
+                            color: "white",
+                            textDecoration: "none",
+                            fontWeight: "bold",
+                            borderBottom: "2px solid white"
+                        }}
+                    >
+                        Request
+                    </a>
+
+                    <a href="/map" style={{ color: "white", textDecoration: "none" }}>
+                        Map
+                    </a>
+
+                    <a href="/volunteer" style={{ color: "white", textDecoration: "none" }}>
+                        Volunteer
+                    </a>
+                </div>
+
+                {/* Login */}
+                <div>
+                    <a
+                        href="/login"
+                        style={{
+                            color: "white",
+                            textDecoration: "none",
+                            fontWeight: "500"
+                        }}
+                    >
+                        Login / Register
+                    </a>
+                </div>
+            </nav>
+            <div style={{ textAlign: "center" }}>
+                <h1
+                    style={{
+                        color: "#2E7D32",
+                        marginBottom: "10px"
+                    }}
+                >
+                    SharePlate Food Request Portal
+                </h1>
+
+                <p
+                    style={{
+                        color: "#666",
+                        fontSize: "17px"
+                    }}
+                >
+                    Browse available food donations and submit a food request for your organisation.
                 </p>
             </div>
 
@@ -108,14 +199,16 @@ const RequestPage = () => {
             {message && (
                 <div
                     style={{
-                        backgroundColor: "#d4edda",
+                        backgroundColor: "#e8f5e9",
                         color: "#155724",
                         padding: "12px",
                         borderRadius: "6px",
                         margin: "20px auto",
                         maxWidth: "700px",
                         textAlign: "center",
-                        fontWeight: "bold"
+                        fontWeight: "bold",
+                        border:"1px solid #81c784",
+                        fontSize:"16px"
                     }}
                 >
                     {message}
@@ -153,8 +246,11 @@ const RequestPage = () => {
             {/* Filter */}
             <div
                 style={{
-                    marginBottom: "20px",
-                    textAlign: "center"
+                    marginBottom: "25px",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: "12px"
                 }}
             >
                 <label
@@ -174,9 +270,11 @@ const RequestPage = () => {
                         setSelectedLocation(e.target.value)
                     }
                     style={{
-                        padding: "8px",
-                        borderRadius: "4px",
-                        border: "1px solid #ccc"
+                        padding: "10px",
+                        borderRadius: "8px",
+                        border: "1px solid #ccc",
+                        width: "220px",
+                        fontSize: "15px"
                     }}
                 >
                     {uniqueLocations.map((location) => (

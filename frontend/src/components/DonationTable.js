@@ -2,9 +2,46 @@ import React from "react";
 
 const DonationTable = ({ filteredDonations, setMessage }) => {
 
-    const handleRequest = (item) => {
-        setMessage(`Request submitted successfully for ${item.foodName}!`);
-        alert(`Food request submitted for ${item.foodName}`);
+    const handleRequest = async (item) => {
+
+        try {
+
+            const response = await fetch(
+                "http://localhost:5000/api/requests",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+
+                        foodName: item.foodName,
+                        donationId: item._id,
+                        quantityRemaining: item.quantity,
+                        status: "Pending"
+
+                    })
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Unable to submit request");
+            }
+
+            const data = await response.json();
+
+            console.log(data);
+
+            setMessage(`${item.foodName} request submitted successfully!`);
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert("Unable to submit request.");
+
+        }
+
     };
 
     return (
@@ -81,22 +118,27 @@ const DonationTable = ({ filteredDonations, setMessage }) => {
                                 disabled={item.status !== "Available"}
                                 onClick={() => handleRequest(item)}
                                 style={{
-                                    width: "100%",
-                                    marginTop: "15px",
                                     backgroundColor:
                                         item.status === "Available"
-                                            ? "#ff9800"
-                                            : "#bdbdbd",
+                                            ? "#2E7D32"
+                                            : "#999",
+
                                     color: "white",
+
                                     border: "none",
-                                    padding: "12px",
-                                    borderRadius: "8px",
-                                    fontWeight: "bold",
-                                    fontSize: "15px",
+
+                                    padding: "10px 18px",
+
+                                    borderRadius: "6px",
+
                                     cursor:
                                         item.status === "Available"
                                             ? "pointer"
-                                            : "not-allowed"
+                                            : "not-allowed",
+
+                                    fontWeight: "bold",
+
+                                    transition: "0.2s"
                                 }}
                             >
                                 {item.status === "Available"
