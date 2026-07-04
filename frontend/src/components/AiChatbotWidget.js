@@ -23,21 +23,42 @@ const AiChatbotWidget = () => {
         e.preventDefault();
         if (!input.trim()) return;
 
-        // Add user message to UI
+        // 1. Render user message instantly
         const userMsg = { sender: 'user', text: input };
         setMessages((prev) => [...prev, userMsg]);
-        setInput('');
+        const currentInput = input; 
+        setInput(''); // Clear the input field
         setIsTyping(true);
 
-        // TODO: Replace this simulated delay with your actual LLM API fetch() call
-        setTimeout(() => {
-            const aiResponse = { 
-                sender: 'ai', 
-                text: "That is a great question. As a demo assistant, I recommend checking our 'How it Works' section on the homepage for standard donation guidelines!" 
-            };
+        try {
+            // 2. Send the message to Node.js backend
+            // Note: Make sure 5000 matches the port your backend actually runs on!
+            const response = await fetch('http://localhost:5000/api/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: currentInput })
+            });
+
+            if (!response.ok) {
+                throw new Error("Backend connection failed");
+            }
+
+            const data = await response.json();
+
+            // 3. Render the real AI's response
+            const aiResponse = { sender: 'ai', text: data.reply };
             setMessages((prev) => [...prev, aiResponse]);
+            
+        } catch (error) {
+            console.error("Chat Integration Error:", error);
+            const errorResponse = { 
+                sender: 'ai', 
+                text: "I am having trouble connecting to the server. Please ensure the backend is running!" 
+            };
+            setMessages((prev) => [...prev, errorResponse]);
+        } finally {
             setIsTyping(false);
-        }, 1500);
+        }
     };
 
     return (
