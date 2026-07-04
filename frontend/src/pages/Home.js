@@ -9,6 +9,23 @@ const Home = () => {
         pendingRequests: 0
     });
 
+    // 2. Slideshow State
+    const [currentSlide, setCurrentSlide] = useState(0);
+    const bannerImages = [
+        '/hero-banner-1.png',
+        '/hero-banner-2.png',
+        '/hero-banner-3.png'
+    ];
+
+    // 3. Slideshow Auto-Play Timer
+    useEffect(() => {
+        const slideTimer = setInterval(() => {
+            setCurrentSlide((prevSlide) => (prevSlide + 1) % bannerImages.length);
+        }, 5000); // Changes image every 5 seconds
+
+        return () => clearInterval(slideTimer); // Cleanup to prevent memory leaks
+    }, [bannerImages.length]);
+
     useEffect(() => {
         // This is where you transplant the fetch() logic from your old Dashboard
         // For now, we are simulating the live data load to ensure UI stability
@@ -39,6 +56,18 @@ const Home = () => {
             
             {/* 2. Hero Section */}
             <section className="hero-section">
+                {/* Background Image Layers for Smooth Fading */}
+                {bannerImages.map((image, index) => (
+                    <div 
+                        key={index}
+                        className={`hero-slide ${index === currentSlide ? 'active' : ''}`}
+                        style={{ 
+                            backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)), url(${image})` 
+                        }}
+                    ></div>
+                ))}
+
+                {/* Hero Text Content */}
                 <div className="hero-content">
                     <h1 className="hero-title">Bridging the Gap Between Surplus and Scarcity</h1>
                     <p className="hero-subtitle">
@@ -49,6 +78,17 @@ const Home = () => {
                         <Link to="/donate" className="btn btn-primary">Donate Surplus</Link>
                         <Link to="/request" className="btn btn-secondary">Request Food</Link>
                     </div>
+                </div>
+
+                {/* Slideshow Navigation Dots */}
+                <div className="slide-indicators">
+                    {bannerImages.map((_, index) => (
+                        <button 
+                            key={index}
+                            className={`dot ${index === currentSlide ? 'active' : ''}`}
+                            onClick={() => setCurrentSlide(index)}
+                        ></button>
+                    ))}
                 </div>
             </section>
 

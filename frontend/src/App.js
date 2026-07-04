@@ -2,7 +2,8 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
     
 // Placeholder imports for the team's pages
-import Home from './pages/Home';           
+import Home from './pages/Home';        
+import About from './pages/About';
 // import Donate from './pages/Donate';       
 // import Request from './pages/Request';     
 // import MapView from './pages/Map';         
@@ -18,6 +19,7 @@ function App() {
           
           {/* 'index' means this loads at the root path "/" */}
           <Route index element={<Home />} /> 
+          <Route path="about" element={<About />} />
           
           {/* Feature Routes (Commented out until teammates build them) */}
           {/* <Route path="donate" element={<Donate />} /> */}
