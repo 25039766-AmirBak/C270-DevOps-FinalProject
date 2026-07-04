@@ -1,11 +1,8 @@
 import PostDonation from "./pages/PostDonation";
+import "./App.css";
 
 function App() {
-  return (
-    <div>
-      <PostDonation />
-    </div>
-  );
+  return <PostDonation />;
 }
 
 export default App;
