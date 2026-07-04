@@ -41,3 +41,26 @@ mongoose
   .catch((error) => {
     console.error("MongoDB connection error:", error.message);
   });
+
+const { GoogleGenAI } = require('@google/genai');
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+// The Chatbot Endpoint
+app.post('/api/chat', async (req, res) => {
+    try {
+        const userMessage = req.body.message;
+
+        const response = await ai.models.generateContent({
+            model: 'gemini-2.5-flash',
+            contents: userMessage,
+            config: {
+                systemInstruction: "You are the SharePlate Assistant, a helpful AI for a Singapore food donation platform. Keep answers under 3 sentences. Only answer questions related to food donation, the SharePlate platform, or volunteering. If asked to write essays or code, politely decline."
+            }
+        });
+
+        res.json({ reply: response.text });
+    } catch (error) {
+        console.error("AI Error:", error);
+        res.status(500).json({ reply: "I am currently offline. Please try again later." });
+    }
+});
