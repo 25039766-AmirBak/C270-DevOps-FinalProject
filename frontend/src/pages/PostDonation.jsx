@@ -11,6 +11,7 @@ function PostDonation() {
   const [donations, setDonations] = useState([]);
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const fetchDonations = async () => {
     try {
@@ -27,53 +28,118 @@ function PostDonation() {
   }, []);
 
   const handleChange = (event) => {
+    const { name, value } = event.target;
+
     setFormData({
       ...formData,
-      [event.target.name]: event.target.value
+      [name]: value
     });
+
+    setErrors({
+      ...errors,
+      [name]: ""
+    });
+
+    setMessage("");
   };
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
-    setIsLoading(true);
-    setMessage("");
+   event.preventDefault();
 
-    try {
-      const response = await fetch("http://localhost:5000/api/donations", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          foodName: formData.foodName,
-          quantity: Number(formData.quantity),
-          location: formData.location,
-          expiryDate: formData.expiryDate
-        })
-      });
+   const isValid = validateForm();
 
-      if (!response.ok) {
-        throw new Error("Failed to post donation");
-      }
+   if (!isValid) {
+    setMessage("Please fix the errors before submitting.");
+    return;
+  }
 
-      setMessage("Donation posted successfully!");
+   setIsLoading(true);
+   setMessage("");
 
-      setFormData({
-        foodName: "",
-        quantity: "",
-        location: "",
-        expiryDate: ""
-      });
+   try {
+    const response = await fetch("http://localhost:5000/api/donations", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        foodName: formData.foodName.trim(),
+        quantity: Number(formData.quantity),
+        location: formData.location.trim(),
+        expiryDate: formData.expiryDate
+      })
+    });
 
-      fetchDonations();
-    } catch (error) {
-      console.error(error);
-      setMessage("Failed to post donation. Please check your backend.");
-    } finally {
-      setIsLoading(false);
+    if (!response.ok) {
+      throw new Error("Failed to post donation");
     }
-  };
 
+    setMessage("Donation posted successfully!");
+
+    setFormData({
+      foodName: "",
+      quantity: "",
+      location: "",
+      expiryDate: ""
+    });
+
+    setErrors({});
+    fetchDonations();
+  } catch (error) {
+    console.error(error);
+    setMessage("Failed to post donation. Please check your backend.");
+  } finally {
+    setIsLoading(false);
+  }
+}; 
+const validateForm = () => {
+  const newErrors = {};
+
+  const foodNameRegex = /^[A-Za-z\s]+$/;
+  const quantityRegex = /^[1-9][0-9]*$/;
+  const locationHasLetterRegex = /[A-Za-z]/;
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const selectedExpiryDate = new Date(formData.expiryDate);
+
+  // Food Name validation
+  if (!formData.foodName.trim()) {
+    newErrors.foodName = "Food name is required.";
+  } else if (formData.foodName.trim().length < 2) {
+    newErrors.foodName = "Food name must be at least 2 characters.";
+  } else if (!foodNameRegex.test(formData.foodName.trim())) {
+    newErrors.foodName = "Food name cannot contain numbers or special characters.";
+  }
+
+  // Quantity validation
+  if (!formData.quantity.trim()) {
+    newErrors.quantity = "Quantity is required.";
+  } else if (!quantityRegex.test(formData.quantity.trim())) {
+    newErrors.quantity = "Quantity must contain numbers only and must be greater than 0.";
+  }
+
+  // Location validation
+  if (!formData.location.trim()) {
+    newErrors.location = "Location is required.";
+  } else if (formData.location.trim().length < 3) {
+    newErrors.location = "Location must be at least 3 characters.";
+  } else if (!locationHasLetterRegex.test(formData.location.trim())) {
+    newErrors.location = "Location cannot be numbers only.";
+  }
+
+  // Expiry Date validation
+  if (!formData.expiryDate) {
+    newErrors.expiryDate = "Expiry date is required.";
+  } else if (selectedExpiryDate < today) {
+    newErrors.expiryDate = "Expiry date cannot be before today.";
+  }
+
+  setErrors(newErrors);
+
+  return Object.keys(newErrors).length === 0;
+};
   return (
     <main className="page">
       <section className="hero-section">
@@ -93,30 +159,31 @@ function PostDonation() {
             Fill in the details below. New donations will be marked as Available.
           </p>
 
-          <form onSubmit={handleSubmit} className="post-donation-form">
+          <form onSubmit={handleSubmit} className="post-donation-form" noValidate>
             <label>
               Food Name
-              <input
-                type="text"
-                name="foodName"
-                value={formData.foodName}
-                onChange={handleChange}
-                placeholder="Example: Chicken Rice"
-                required
+               <input
+                 type="text"
+                 name="foodName"
+                 value={formData.foodName}
+                 onChange={handleChange}
+                 placeholder="Example: Chicken Rice"
+                 className={errors.foodName ? "input-error" : ""}
               />
+               {errors.foodName && <span className="error-text">{errors.foodName}</span>}
             </label>
 
             <label>
               Quantity
               <input
-                type="number"
+                type="text"
                 name="quantity"
                 value={formData.quantity}
                 onChange={handleChange}
                 placeholder="Example: 10"
-                min="1"
-                required
+                className={errors.quantity ? "input-error" : ""}
               />
+              {errors.quantity && <span className="error-text">{errors.quantity}</span>}
             </label>
 
             <label>
@@ -127,8 +194,9 @@ function PostDonation() {
                 value={formData.location}
                 onChange={handleChange}
                 placeholder="Example: RP Canteen"
-                required
+                className={errors.location ? "input-error" : ""}
               />
+              {errors.location && <span className="error-text">{errors.location}</span>}
             </label>
 
             <label>
@@ -138,8 +206,9 @@ function PostDonation() {
                 name="expiryDate"
                 value={formData.expiryDate}
                 onChange={handleChange}
-                required
+                className={errors.expiryDate ? "input-error" : ""}
               />
+              {errors.expiryDate && <span className="error-text">{errors.expiryDate}</span>}
             </label>
 
             <button type="submit" disabled={isLoading}>
