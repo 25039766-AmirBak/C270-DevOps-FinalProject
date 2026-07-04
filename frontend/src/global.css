@@ -5,6 +5,61 @@
   --text-dark: #1F2937;
 }
 
+/* --- GLOBAL LAYOUT (NAVBAR & FOOTER) --- */
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Forces the app to be at least the height of the screen */
+}
+
+.global-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--primary-color);
+  color: white;
+  padding: 15px 40px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.nav-links, .auth-links {
+  display: flex;
+  gap: 25px;
+  align-items: center;
+}
+
+.global-navbar a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1rem;
+  transition: opacity 0.2s ease;
+}
+
+.global-navbar a:hover {
+  opacity: 0.8;
+  text-decoration: underline;
+}
+
+.global-footer {
+  background-color: #1F2937; /* Dark charcoal */
+  color: #9CA3AF; /* Light gray text */
+  text-align: center;
+  padding: 20px;
+  margin-top: auto; /* Pushes the footer to the bottom of the page */
+  font-size: 0.9rem;
+}
+
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;
