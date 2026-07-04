@@ -78,7 +78,7 @@ function PostDonation() {
     <main className="page">
       <section className="hero-section">
         <div>
-          <p className="eyebrow">Food Donation App</p>
+          <p className="eyebrow">SharePlate</p>
           <h1>Post Food Donation</h1>
           <p className="hero-text">
             Help reduce food waste by sharing surplus food with people who need it.
