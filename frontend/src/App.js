@@ -1,13 +1,10 @@
 import React from 'react';
 import './App.css';
-import Dashboard from './components/Dashboard';
+import RequestPage from './components/RequestPage';
 
 function App() {
   return (
-    <div className="App">
-      <h1>SharePlate Admin Portal</h1>
-      <Dashboard />
-    </div>
+      <RequestPage />
   );
 }
 

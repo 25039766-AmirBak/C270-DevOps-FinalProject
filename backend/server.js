@@ -2,6 +2,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const requestRoutes = require("./routes/requestRoutes");
 require("dotenv").config();
 
 
@@ -12,6 +13,8 @@ const app = express();
 // 3. Middleware
 app.use(cors());
 app.use(express.json());
+app.use("/api/donations", donationRoutes);
+app.use("/api/requests", requestRoutes);
 
 
 // 4. Test route

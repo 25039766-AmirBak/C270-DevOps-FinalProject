@@ -1,50 +1,114 @@
-import React from 'react';
+import React from "react";
 
-const handleRequest = (item) => {
-    alert(`Food request submitted for ${item.foodName}`);
-};
-    
-// This component receives 'filteredDonations' as a prop from the parent Dashboard
-const DonationTable = ({ filteredDonations }) => {
+const DonationTable = ({ filteredDonations, setMessage }) => {
+
+    const handleRequest = (item) => {
+        setMessage(`Request submitted successfully for ${item.foodName}!`);
+        alert(`Food request submitted for ${item.foodName}`);
+    };
+
     return (
-        <div>
-            <h3>Recent Postings</h3>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                <thead>
-                    <tr style={{ backgroundColor: '#f2f2f2', borderBottom: '2px solid #ddd' }}>
-                        <th style={{ padding: '10px' }}>Food Name</th>
-                        <th style={{ padding: '10px' }}>Quantity</th>
-                        <th style={{ padding: '10px' }}>Location</th>
-                        <th style={{ padding: '10px' }}>Status</th>
-                        <th style={{ padding: '10px' }}>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {filteredDonations.length > 0 ? (
-                        filteredDonations.map((item) => (
-                            <tr key={item._id} style={{ borderBottom: '1px solid #ddd' }}>
-                                <td style={{ padding: '10px' }}>{item.foodName}</td>
-                                <td style={{ padding: '10px' }}>{item.quantity}</td>
-                                <td style={{ padding: '10px' }}>{item.location}</td>
-                                <td style={{ padding: '10px', color: item.status === 'Available' ? 'green' : 'red' }}>
+        <div style={{ marginTop: "40px" }}>
+
+            <h2
+                style={{
+                    textAlign: "center",
+                    marginBottom: "30px",
+                    color: "#2e7d32"
+                }}
+            >
+                Available Food Donations
+            </h2>
+
+            {filteredDonations.length === 0 ? (
+                <p style={{ textAlign: "center" }}>
+                    No food donations available.
+                </p>
+            ) : (
+                <div
+                    style={{
+                        display: "grid",
+                        gridTemplateColumns:
+                            "repeat(auto-fit, minmax(320px, 1fr))",
+                        gap: "20px"
+                    }}
+                >
+                    {filteredDonations.map((item) => (
+
+                        <div
+                            key={item._id}
+                            style={{
+                                background: "#fff",
+                                borderRadius: "12px",
+                                boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+                                padding: "20px",
+                                borderTop: "5px solid #2e7d32"
+                            }}
+                        >
+                            <h3
+                                style={{
+                                    marginTop: 0,
+                                    color: "#2e7d32"
+                                }}
+                            >
+                                {item.foodName}
+                            </h3>
+
+                            <p>
+                                <strong>Quantity:</strong> {item.quantity}
+                            </p>
+
+                            <p>
+                                <strong>Location:</strong> {item.location}
+                            </p>
+
+                            <p>
+                                <strong>Status:</strong>{" "}
+                                <span
+                                    style={{
+                                        color:
+                                            item.status === "Available"
+                                                ? "green"
+                                                : "red",
+                                        fontWeight: "bold"
+                                    }}
+                                >
                                     {item.status}
-                                </td>
-                                <td style={{ padding: '10px' }}>
-                                    <button onClick={() => handleRequest(item)}>
-                                        Request Food
-                                    </button>
-                                </td>
-                            </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="5" style={{ padding: '20px', textAlign: 'center', color: '#777' }}>
-                                No records found for this location.
-                            </td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
+                                </span>
+                            </p>
+
+                            <button
+                                disabled={item.status !== "Available"}
+                                onClick={() => handleRequest(item)}
+                                style={{
+                                    width: "100%",
+                                    marginTop: "15px",
+                                    backgroundColor:
+                                        item.status === "Available"
+                                            ? "#ff9800"
+                                            : "#bdbdbd",
+                                    color: "white",
+                                    border: "none",
+                                    padding: "12px",
+                                    borderRadius: "8px",
+                                    fontWeight: "bold",
+                                    fontSize: "15px",
+                                    cursor:
+                                        item.status === "Available"
+                                            ? "pointer"
+                                            : "not-allowed"
+                                }}
+                            >
+                                {item.status === "Available"
+                                    ? "Request Food"
+                                    : "Unavailable"}
+                            </button>
+
+                        </div>
+
+                    ))}
+                </div>
+            )}
         </div>
     );
 };
