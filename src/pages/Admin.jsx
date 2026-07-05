@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import authService from '../services/authService';
 
 function Admin() {
@@ -45,6 +46,9 @@ function Admin() {
             <li>Delete User</li>
             <li>View Users</li>
           </ul>
+          <Link to="/admin/verification" className="download-link">
+            View pending verification requests
+          </Link>
         </>
       ) : (
         <p>Access Denied</p>
