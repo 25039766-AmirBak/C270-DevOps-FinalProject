@@ -26,10 +26,19 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["Donor", "Recipient", "Volunteer", "Admin"],
       default: "Recipient"
-    }
-  },
+    },
+    verificationStatus: {
+      type: String,
+      enum: ['Not Submitted','Pending','Verified','Rejected'],
+      default: 'Not Submitted'
+     },
+    
+    fasDocument: {
+      type: String
+      }
+    },
   {
-    timestamps: true
+   timestamps: true
   }
 );
 
