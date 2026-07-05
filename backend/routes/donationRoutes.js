@@ -17,10 +17,43 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Create donation
+// Create donation with validation features 
 router.post("/", async (req, res) => {
   try {
-    const donation = new Donation(req.body);
+    const { foodName, quantity, location, expiryDate } = req.body;
+
+    if (!foodName || foodName.trim().length < 2) {
+      return res.status(400).json({ message: "Food name must be at least 2 characters." });
+    }
+
+    if (!quantity || Number(quantity) <= 0) {
+      return res.status(400).json({ message: "Quantity must be greater than 0." });
+    }
+
+    if (!location || location.trim().length < 3) {
+      return res.status(400).json({ message: "Location must be at least 3 characters." });
+    }
+
+    if (!expiryDate) {
+      return res.status(400).json({ message: "Expiry date is required." });
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const selectedExpiryDate = new Date(expiryDate);
+
+    if (selectedExpiryDate < today) {
+      return res.status(400).json({ message: "Expiry date cannot be before today." });
+    }
+
+    const donation = new Donation({
+      foodName: foodName.trim(),
+      quantity: Number(quantity),
+      location: location.trim(),
+      expiryDate
+    });
+
     const savedDonation = await donation.save();
 
     res.status(201).json(savedDonation);
