@@ -6,8 +6,10 @@ const RequestPage = () => {
     const [selectedLocation, setSelectedLocation] = useState('All');
     const [isLoading, setIsLoading] = useState(true);
     const [message, setMessage] = useState("");
+    const [requests, setRequests] = useState([]);
 
     useEffect(() => {
+
         const fetchLiveInventory = async () => {
             try {
                 const response = await fetch(
@@ -15,7 +17,7 @@ const RequestPage = () => {
                 );
 
                 if (!response.ok) {
-                    throw new Error("Failed to connect to the backend server");
+                    throw new Error("Failed to connect");
                 }
 
                 const liveData = await response.json();
@@ -24,14 +26,95 @@ const RequestPage = () => {
                 setIsLoading(false);
 
             } catch (error) {
-                console.error("Error:", error);
+                console.error(error);
                 setIsLoading(false);
             }
         };
 
-        fetchLiveInventory();
-    }, []);
+        const fetchRequests = async () => {
+            try {
 
+                const response = await fetch(
+                    "http://localhost:5000/api/requests"
+                );
+
+                const data = await response.json();
+
+                setRequests(data);
+
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        fetchLiveInventory();
+        fetchRequests();
+
+        }, []);
+    const [chatOpen, setChatOpen] = useState(false);
+    const [chatInput, setChatInput] = useState("");
+    const [chatMessages, setChatMessages] = useState([
+        {
+            sender: "AI",
+            text: "Hi! I'm the SharePlate Assistant. Ask me anything about requesting food, donations or volunteering."
+        }
+    ]);
+
+    const sendMessage = async () => {
+
+    if (!chatInput.trim()) return;
+
+        const userMessage = chatInput;
+
+    // Display user's message
+    setChatMessages(prev => [
+        ...prev,
+        {
+            sender: "You",
+            text: userMessage
+        }
+    ]);
+
+    setChatInput("");
+
+    try {
+
+        const response = await fetch(
+            "http://localhost:5000/api/chat",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    message: userMessage
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        setChatMessages(prev => [
+            ...prev,
+            {
+                sender: "AI",
+                text: data.reply
+            }
+        ]);
+
+    } catch (error) {
+
+        setChatMessages(prev => [
+            ...prev,
+            {
+                sender: "AI",
+                text: "Sorry, I'm currently offline."
+            }
+        ]);
+
+    }
+
+    };
     // Get unique locations
     const uniqueLocations = [
         "All",
@@ -136,28 +219,12 @@ const RequestPage = () => {
                         Home
                     </a>
 
-                    <a href="/donate" style={{ color: "white", textDecoration: "none" }}>
-                        Donate
-                    </a>
-
-                    <a
-                        href="/request"
-                        style={{
-                            color: "white",
-                            textDecoration: "none",
-                            fontWeight: "bold",
-                            borderBottom: "2px solid white"
-                        }}
-                    >
-                        Request
+                    <a href="/about" style={{ color: "white", textDecoration: "none" }}>
+                        About Us
                     </a>
 
                     <a href="/map" style={{ color: "white", textDecoration: "none" }}>
                         Map
-                    </a>
-
-                    <a href="/volunteer" style={{ color: "white", textDecoration: "none" }}>
-                        Volunteer
                     </a>
                 </div>
 
@@ -293,6 +360,243 @@ const RequestPage = () => {
                 filteredDonations={filteredDonations}
                 setMessage={setMessage}
             />
+            <div
+                style={{
+                    marginTop: "50px",
+                    background: "white",
+                    padding: "20px",
+                    borderRadius: "10px",
+                    boxShadow: "0 2px 10px rgba(0,0,0,.1)"
+                }}
+            >
+
+                <h2
+                    style={{
+                        color: "#2E7D32",
+                        marginBottom: "20px"
+                    }}
+                >
+                    My Food Requests
+                </h2>
+
+                <table
+                    style={{
+                        width: "100%",
+                        borderCollapse: "collapse"
+                    }}
+                >
+
+                    <thead>
+
+                        <tr
+                            style={{
+                                background: "#2E7D32",
+                                color: "white"
+                            }}
+                        >
+                            <th style={{padding:"12px"}}>Food</th>
+                            <th style={{padding:"12px"}}>Quantity</th>
+                            <th style={{padding:"12px"}}>Status</th>
+                            <th style={{padding:"12px"}}>Date</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {requests.length === 0 ? (
+
+                            <tr>
+
+                                <td
+                                    colSpan="4"
+                                    style={{
+                                        textAlign:"center",
+                                        padding:"20px"
+                                    }}
+                                >
+                                    No requests submitted yet.
+                                </td>
+
+                            </tr>
+
+                        ) : (
+
+                            requests.map(request => (
+
+                                <tr
+                                    key={request._id}
+                                    style={{
+                                        borderBottom:"1px solid #ddd"
+                                    }}
+                                >
+
+                                    <td style={{padding:"12px"}}>
+                                        {request.foodName}
+                                    </td>
+
+                                    <td style={{padding:"12px"}}>
+                                        {request.quantityRemaining}
+                                    </td>
+
+                                    <td
+                                        style={{
+                                            padding:"12px",
+                                            color:
+                                                request.status==="Pending"
+                                                    ? "orange"
+                                                    : "green"
+                                        }}
+                                    >
+                                        {request.status}
+                                    </td>
+
+                                    <td style={{padding:"12px"}}>
+                                        {new Date(request.createdAt).toLocaleDateString()}
+                                    </td>
+
+                                </tr>
+
+                            ))
+
+                        )}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+            {/* Floating Chat Button */}
+
+            <button
+                onClick={() => setChatOpen(!chatOpen)}
+                style={{
+                    position: "fixed",
+                    bottom: "20px",
+                    right: "20px",
+                    width: "80px",
+                    height: "70px",
+                    borderRadius: "50%",
+                    border: "none",
+                    backgroundColor: "#2E7D32",
+                    color: "white",
+                    fontSize: "16px",
+                    cursor: "pointer",
+                    boxShadow: "0 5px 12px rgba(0,0,0,.3)"
+                }}
+            >
+                💬Ask AI
+            </button>
+            {chatOpen && (
+
+            <div
+                style={{
+                    position: "fixed",
+                    bottom: "100px",
+                    right: "20px",
+                    width: "350px",
+                    height: "500px",
+                    background: "white",
+                    borderRadius: "12px",
+                    boxShadow: "0 10px 30px rgba(0,0,0,.25)",
+                    display: "flex",
+                    flexDirection: "column",
+                    overflow: "hidden"
+                }}
+            >
+
+                <div
+                    style={{
+                        background: "#2E7D32",
+                        color: "white",
+                        padding: "15px",
+                        fontWeight: "bold"
+                    }}
+                >
+                    SharePlate AI
+                </div>
+
+                <div
+                    style={{
+                        flex: 1,
+                        overflowY: "auto",
+                        padding: "15px",
+                        background: "#fafafa"
+                    }}
+                >
+
+                    {chatMessages.map((msg, index) => (
+
+                        <div
+                            key={index}
+                            style={{
+                                marginBottom: "12px"
+                            }}
+                        >
+
+                            <strong>{msg.sender}</strong>
+
+                            <div>
+                                {msg.text}
+                            </div>
+
+                        </div>
+
+                    ))}
+
+                </div>
+
+                <div
+                    style={{
+                        display: "flex",
+                        borderTop: "1px solid #ddd"
+                    }}
+                >
+
+                    <input
+
+                        value={chatInput}
+
+                        onChange={(e) =>
+                            setChatInput(e.target.value)
+                        }
+
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                                sendMessage();
+                            }
+                        }}
+
+                        placeholder="Ask SharePlate AI..."
+
+                        style={{
+                            flex: 1,
+                            border: "none",
+                            padding: "12px",
+                            outline: "none"
+                        }}
+                    />
+
+                    <button
+
+                        onClick={sendMessage}
+
+                        style={{
+                            background: "#2E7D32",
+                            color: "white",
+                            border: "none",
+                            padding: "0 20px",
+                            cursor: "pointer"
+                        }}
+                    >
+                        Send
+                    </button>
+
+                </div>
+
+            </div>
+
+            )}
         </div>
     );
 };
