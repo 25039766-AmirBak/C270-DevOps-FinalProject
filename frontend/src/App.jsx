@@ -1,5 +1,4 @@
-import PostDonation from "./pages/PostDonation";
-import "./App.css";
+import PostDonation from "./pages/PostDonation"
 
 function App() {
   return <PostDonation />;
