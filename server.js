@@ -4,6 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
+const verificationRoutes = require('./routes/verificationRoutes');
 const authMiddleware = require('./middleware/authMiddleware');
 
 //Creates Express app and sets the port
@@ -31,6 +32,7 @@ app.get('/health', (req, res) => {
 
 //Authentication & profile routes, protected by Middleware
 app.use('/api/auth', authRoutes);
+app.use('/api/verification', verificationRoutes);
 app.get('/api/profile', authMiddleware, (req, res) => {
   res.json({
     message: 'Access granted',

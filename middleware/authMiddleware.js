@@ -26,12 +26,28 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
+const isAdminRole = (role) => role === 'admin' || role === 'Admin';
+
 const adminMiddleware = (req, res, next) => {
-  if (req.user?.role !== 'admin') {
+  if (!isAdminRole(req.user?.role)) {
     return res.status(403).json({ message: 'Admin access required' });
   }
   next();
 };
 
+const requireVerifiedRecipient = (req, res, next) => {
+  if (req.user?.role && req.user.role.toLowerCase() !== 'recipient') {
+    return next();
+  }
+
+  if (req.user?.verificationStatus !== 'Verified') {
+    return res.status(403).json({ message: 'Recipient has not been verified.' });
+  }
+
+  next();
+};
+
 module.exports = authMiddleware;
 module.exports.adminMiddleware = adminMiddleware;
+module.exports.protect = authMiddleware;
+module.exports.requireVerifiedRecipient = requireVerifiedRecipient;
