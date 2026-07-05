@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import DonationTable from './DonationTable';
+import '../requestsystem.css';
 
 const RequestPage = () => {
     const [donations, setDonations] = useState([]);
@@ -131,36 +132,8 @@ const RequestPage = () => {
 
     if (isLoading) {
         return (
-            <div
-                style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    height: "60vh",
-                    fontFamily: "Arial, sans-serif"
-                }}
-            >
-                <style>
-                    {`
-                    @keyframes spin {
-                        0% { transform: rotate(0deg); }
-                        100% { transform: rotate(360deg); }
-                    }
-                    `}
-                </style>
-
-                <div
-                    style={{
-                        border: "4px solid #f3f3f3",
-                        borderTop: "4px solid #2196F3",
-                        borderRadius: "50%",
-                        width: "40px",
-                        height: "40px",
-                        animation: "spin 1s linear infinite",
-                        marginBottom: "20px"
-                    }}
-                />
+            <div className="loading-container">
+            <div className="loading-spinner"></div>
 
                 <h2>Loading Available Donations...</h2>
 
@@ -176,173 +149,64 @@ const RequestPage = () => {
                     minHeight: "100vh",
                 }}
             >
-            
-            {/* Header */}
-            <nav
-                style={{
-                    backgroundColor: "#2E7D32",
-                    color: "white",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "15px 30px",
-                    marginBottom: "40px"
-                }}
-            >
-                {/* Logo */}
-                <div
-                    style={{
-                        fontSize: "30px",
-                        fontWeight: "bold"
-                    }}
-                >
-                    <a
-                        href="/"
-                        style={{
-                            textDecoration: "none",
-                            color: "white"
-                        }}
-                    >
-                        SharePlate
-                    </a>
+            {/*Navbar*/}
+            <nav className="global-navbar">
+                <div className="logo">
+                    <a href="/">SharePlate</a>
                 </div>
 
-                {/* Navigation */}
-                <div
-                    style={{
-                        display: "flex",
-                        gap: "30px",
-                        fontSize: "16px"
-                    }}
-                >
-                    <a href="/" style={{ color: "white", textDecoration: "none" }}>
-                        Home
-                    </a>
-
-                    <a href="/about" style={{ color: "white", textDecoration: "none" }}>
-                        About Us
-                    </a>
-
-                    <a href="/map" style={{ color: "white", textDecoration: "none" }}>
-                        Map
-                    </a>
+                <div className="nav-links">
+                    <a href="/">Home</a>
+                    <a href="/about">About Us</a>
+                    <a href="/map">Map</a>
                 </div>
 
-                {/* Login */}
-                <div>
-                    <a
-                        href="/login"
-                        style={{
-                            color: "white",
-                            textDecoration: "none",
-                            fontWeight: "500"
-                        }}
-                    >
-                        Login / Register
-                    </a>
+                <div className="auth-links">
+                    <a href="/login">Login / Register</a>
                 </div>
             </nav>
-            <div style={{ textAlign: "center" }}>
-                <h1
-                    style={{
-                        color: "#2E7D32",
-                        marginBottom: "10px"
-                    }}
-                >
-                    SharePlate Food Request Portal
-                </h1>
 
-                <p
-                    style={{
-                        color: "#666",
-                        fontSize: "17px"
-                    }}
-                >
-                    Browse available food donations and submit a food request for your organisation.
-                </p>
-            </div>
+            {/* Header */} 
+            <div className="request-page-container">
 
-            {/* Success Message */}
-            {message && (
-                <div
-                    style={{
-                        backgroundColor: "#e8f5e9",
-                        color: "#155724",
-                        padding: "12px",
-                        borderRadius: "6px",
-                        margin: "20px auto",
-                        maxWidth: "700px",
-                        textAlign: "center",
-                        fontWeight: "bold",
-                        border:"1px solid #81c784",
-                        fontSize:"16px"
-                    }}
-                >
-                    {message}
+                <div className="request-header">
+                    <h1>SharePlate Food Request Portal</h1>
+                    <p>
+                        Browse available food donations and submit a food request for your organisation.
+                    </p>
                 </div>
-            )}
 
-            {/* Instructions */}
-            <div
-                style={{
-                    backgroundColor: "#f8f9fa",
-                    border: "1px solid #ddd",
-                    borderRadius: "8px",
-                    padding: "15px",
-                    margin: "20px auto",
-                    maxWidth: "700px"
-                }}
-            >
-                <h3>How to Request Food</h3>
+                {message && (
+                    <div className="request-success">
+                        {message}
+                    </div>
+                )}
 
-                <ol>
-                    <li>Select a location.</li>
-                    <li>Browse the available food donations.</li>
-                    <li>Click <strong>Request Food</strong>.</li>
-                    <li>Your request will be submitted successfully.</li>
-                </ol>
+                <div className="request-card">
+                    <h3>How to Request Food</h3>
+                    <ol>
+                        <li>Select a location.</li>
+                        <li>Browse the available food donations.</li>
+                        <li>Click Request Food.</li>
+                        <li>Your request will be submitted successfully.</li>
+                    </ol>
+                </div>
+
             </div>
-
-            <hr
-                style={{
-                    margin: "30px 0",
-                    border: "1px solid #ddd"
-                }}
-            />
 
             {/* Filter */}
-            <div
-                style={{
-                    marginBottom: "25px",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: "12px"
-                }}
-            >
-                <label
-                    htmlFor="locationFilter"
-                    style={{
-                        marginRight: "10px",
-                        fontWeight: "bold"
-                    }}
-                >
-                    Filter by Location:
-                </label>
+            <div className="filter-container">
 
-                <select
+            <label htmlFor="locationFilter">
+                Filter by Location
+            </label>
+
+                <select className="filter-select"
                     id="locationFilter"
                     value={selectedLocation}
                     onChange={(e) =>
                         setSelectedLocation(e.target.value)
                     }
-                    style={{
-                        padding: "10px",
-                        borderRadius: "8px",
-                        border: "1px solid #ccc",
-                        width: "220px",
-                        fontSize: "15px"
-                    }}
                 >
                     {uniqueLocations.map((location) => (
                         <option
@@ -360,44 +224,16 @@ const RequestPage = () => {
                 filteredDonations={filteredDonations}
                 setMessage={setMessage}
             />
-            <div
-                style={{
-                    marginTop: "50px",
-                    background: "white",
-                    padding: "20px",
-                    borderRadius: "10px",
-                    boxShadow: "0 2px 10px rgba(0,0,0,.1)"
-                }}
-            >
-
-                <h2
-                    style={{
-                        color: "#2E7D32",
-                        marginBottom: "20px"
-                    }}
-                >
-                    My Food Requests
-                </h2>
-
-                <table
-                    style={{
-                        width: "100%",
-                        borderCollapse: "collapse"
-                    }}
-                >
-
+            {/* My Requests Table */}
+            <div className="request-history">
+                <h2>My Food Requests</h2>
+                <table className="request-table">
                     <thead>
-
-                        <tr
-                            style={{
-                                background: "#2E7D32",
-                                color: "white"
-                            }}
-                        >
-                            <th style={{padding:"12px"}}>Food</th>
-                            <th style={{padding:"12px"}}>Quantity</th>
-                            <th style={{padding:"12px"}}>Status</th>
-                            <th style={{padding:"12px"}}>Date</th>
+                        <tr>
+                            <th>Food</th>
+                            <th>Quantity</th>
+                            <th>Status</th>
+                            <th>Date</th>
                         </tr>
 
                     </thead>
@@ -408,13 +244,7 @@ const RequestPage = () => {
 
                             <tr>
 
-                                <td
-                                    colSpan="4"
-                                    style={{
-                                        textAlign:"center",
-                                        padding:"20px"
-                                    }}
-                                >
+                                <td colSpan="4" className="empty-request">
                                     No requests submitted yet.
                                 </td>
 
@@ -424,34 +254,27 @@ const RequestPage = () => {
 
                             requests.map(request => (
 
-                                <tr
-                                    key={request._id}
-                                    style={{
-                                        borderBottom:"1px solid #ddd"
-                                    }}
-                                >
+                                <tr key={request._id}>
 
-                                    <td style={{padding:"12px"}}>
+                                    <td>
                                         {request.foodName}
                                     </td>
 
-                                    <td style={{padding:"12px"}}>
+                                    <td>
                                         {request.quantityRemaining}
                                     </td>
 
                                     <td
-                                        style={{
-                                            padding:"12px",
-                                            color:
-                                                request.status==="Pending"
-                                                    ? "orange"
-                                                    : "green"
-                                        }}
+                                        className={
+                                            request.status === "Pending"
+                                                ? "status-pending"
+                                                : "status-approved"
+                                        }
                                     >
                                         {request.status}
                                     </td>
 
-                                    <td style={{padding:"12px"}}>
+                                    <td className="request-date">
                                         {new Date(request.createdAt).toLocaleDateString()}
                                     </td>
 
@@ -467,137 +290,79 @@ const RequestPage = () => {
 
             </div>
             {/* Floating Chat Button */}
-
+            <div className="chatbot-wrapper">
             <button
+                className="chatbot-toggle-btn"
                 onClick={() => setChatOpen(!chatOpen)}
-                style={{
-                    position: "fixed",
-                    bottom: "20px",
-                    right: "20px",
-                    width: "80px",
-                    height: "70px",
-                    borderRadius: "50%",
-                    border: "none",
-                    backgroundColor: "#2E7D32",
-                    color: "white",
-                    fontSize: "16px",
-                    cursor: "pointer",
-                    boxShadow: "0 5px 12px rgba(0,0,0,.3)"
-                }}
             >
-                💬Ask AI
+                💬 Ask AI
             </button>
+            
             {chatOpen && (
 
-            <div
-                style={{
-                    position: "fixed",
-                    bottom: "100px",
-                    right: "20px",
-                    width: "350px",
-                    height: "500px",
-                    background: "white",
-                    borderRadius: "12px",
-                    boxShadow: "0 10px 30px rgba(0,0,0,.25)",
-                    display: "flex",
-                    flexDirection: "column",
-                    overflow: "hidden"
-                }}
-            >
+            <div className="chatbot-window">
 
-                <div
-                    style={{
-                        background: "#2E7D32",
-                        color: "white",
-                        padding: "15px",
-                        fontWeight: "bold"
-                    }}
-                >
-                    SharePlate AI
+                <div className="chatbot-header">
+                    <h4>SharePlate AI</h4>
+
+                    <button
+                        className="close-btn"
+                        onClick={() => setChatOpen(false)}
+                    >
+                        ✖
+                    </button>
                 </div>
-
-                <div
-                    style={{
-                        flex: 1,
-                        overflowY: "auto",
-                        padding: "15px",
-                        background: "#fafafa"
-                    }}
-                >
+                <div className="chatbot-messages">
 
                     {chatMessages.map((msg, index) => (
 
                         <div
                             key={index}
-                            style={{
-                                marginBottom: "12px"
-                            }}
+                            className={
+                                msg.sender === "AI"
+                                    ? "message-bubble ai"
+                                    : "message-bubble user"
+                            }
                         >
-
-                            <strong>{msg.sender}</strong>
-
-                            <div>
-                                {msg.text}
-                            </div>
-
+                            {msg.text}
                         </div>
 
                     ))}
 
                 </div>
 
-                <div
-                    style={{
-                        display: "flex",
-                        borderTop: "1px solid #ddd"
-                    }}
-                >
+                <div className="chatbot-input-area">
 
                     <input
-
                         value={chatInput}
-
-                        onChange={(e) =>
-                            setChatInput(e.target.value)
-                        }
-
-                        onKeyDown={(e) => {
-                            if (e.key === "Enter") {
+                        onChange={(e)=>setChatInput(e.target.value)}
+                        onKeyDown={(e)=>{
+                            if(e.key==="Enter"){
                                 sendMessage();
                             }
                         }}
-
                         placeholder="Ask SharePlate AI..."
-
-                        style={{
-                            flex: 1,
-                            border: "none",
-                            padding: "12px",
-                            outline: "none"
-                        }}
                     />
 
                     <button
-
+                        className="send-btn"
                         onClick={sendMessage}
-
-                        style={{
-                            background: "#2E7D32",
-                            color: "white",
-                            border: "none",
-                            padding: "0 20px",
-                            cursor: "pointer"
-                        }}
                     >
                         Send
                     </button>
 
                 </div>
 
+                <div className="chatbot-disclaimer">
+                    AI responses may be inaccurate. Verify important information.
+                </div>
+
             </div>
 
             )}
         </div>
+
+    </div>
     );
 };
 
