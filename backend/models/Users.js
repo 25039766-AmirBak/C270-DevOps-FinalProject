@@ -16,10 +16,11 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
 
-    passwordHash: {
+    password: {
       type: String,
       required: true,
-      minlength:8
+      minlength:8,
+      select: false
     },
 
     role: {
@@ -33,7 +34,7 @@ const userSchema = new mongoose.Schema(
       default: 'Not Submitted'
      },
     
-    fasDocument: {
+    document: {
       type: String
       }
     },
