@@ -5,29 +5,36 @@ function AdminVerification() {
   const [requests, setRequests] = useState([]);
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    if (!token) return;
+    authService
+      .getPendingVerifications(token)
+      .then((res) => setRequests(res.data || []))
+      .catch((err) => setMessage(err.response?.data?.message || 'Unable to load requests'))
+      .finally(() => setLoading(false));
+  }, [token]);
 
-    if (!token) {
-      setMessage('Please log in again to view verification requests.');
-      setLoading(false);
-      return;
+  const handleStatus = async (id, status) => {
+    if (!token) return;
+    try {
+      await authService.updateVerification(id, status, token);
+      setRequests((prev) => prev.filter((r) => r._id !== id));
+      setMessage(`User ${status.toLowerCase()} successfully`);
+    } catch (err) {
+      setMessage(err.response?.data?.message || 'Update failed');
     }
+  };
 
-    const fetchPendingVerifications = async () => {
-      try {
-        const res = await authService.getPendingVerifications(token);
-        setRequests(res.data || []);
-      } catch (error) {
-        setMessage(error.response?.data?.message || 'Unable to load verification requests');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPendingVerifications();
-  }, []);
+  if (!token) {
+    return (
+      <div className="page-card admin-verification">
+        <h2>Pending Verification Requests</h2>
+        <p>Please log in again to view verification requests.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="page-card admin-verification">
@@ -37,26 +44,35 @@ function AdminVerification() {
       {!loading && !message && requests.length === 0 && <p>No pending verifications.</p>}
 
       <div className="verification-list">
-        {requests.map((item, index) => (
-          <div key={item.email || index} className="verification-item">
+        {requests.map((item) => (
+          <div key={item.email} className="verification-item">
             <div className="verification-main">
               <span className="verification-name">{item.name}</span>
-              <span className="verification-status">{item.verificationStatus || 'Pending'}</span>
+              <span className="verification-status">{item.verificationStatus}</span>
             </div>
-
             <div className="verification-actions">
-              <a
-                className="download-link"
-                href={`http://localhost:5000/uploads/${encodeURIComponent(item.fasDocument || '')}`}
-                target="_blank"
-                rel="noreferrer"
+              {item.document && (
+                <a
+                  className="download-link"
+                  href={`/uploads/${encodeURIComponent(item.document)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Document
+                </a>
+              )}
+              <button
+                type="button"
+                className="approve-btn"
+                onClick={() => handleStatus(item._id, 'Verified')}
               >
-                Download document
-              </a>
-              <button type="button" className="approve-btn">
                 Approve
               </button>
-              <button type="button" className="reject-btn">
+              <button
+                type="button"
+                className="reject-btn"
+                onClick={() => handleStatus(item._id, 'Rejected')}
+              >
                 Reject
               </button>
             </div>

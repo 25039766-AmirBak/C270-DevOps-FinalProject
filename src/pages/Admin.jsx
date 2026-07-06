@@ -5,54 +5,55 @@ import authService from '../services/authService';
 function Admin() {
   const [user, setUser] = useState(null);
   const [message, setMessage] = useState('');
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    if (!token) return;
+    authService
+      .getProfile(token)
+      .then((res) => setUser(res.data.user))
+      .catch((err) => setMessage(err.response?.data?.message || 'Unable to load profile'));
+  }, [token]);
 
-    if (!token) {
-      setMessage('No token found. Please log in again.');
-      return;
-    }
-
-    const fetchProfile = async () => {
-      try {
-        const res = await authService.getProfile(token);
-        setUser(res.data);
-      } catch (error) {
-        setMessage(error.response?.data?.message || 'Unable to load profile');
-      }
-    };
-
-    fetchProfile();
-  }, []);
+  if (!token) {
+    return (
+      <div className="page-card">
+        <h2>Admin Panel</h2>
+        <p>No token found. Please log in again.</p>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
       <div className="page-card">
-        <h2>Admin Page</h2>
+        <h2>Admin Panel</h2>
         <p>{message || 'Loading profile...'}</p>
+      </div>
+    );
+  }
+
+  if (user.role !== 'Admin') {
+    return (
+      <div className="page-card">
+        <h2>Admin Panel</h2>
+        <p>Access Denied</p>
       </div>
     );
   }
 
   return (
     <div className="page-card">
-      <h2>Admin Page</h2>
-      {user.role === 'admin' ? (
-        <>
-          <p>Welcome, admin {user.name}</p>
-          <ul>
-            <li>Promote User</li>
-            <li>Delete User</li>
-            <li>View Users</li>
-          </ul>
-          <Link to="/admin/verification" className="download-link">
-            View pending verification requests
-          </Link>
-        </>
-      ) : (
-        <p>Access Denied</p>
-      )}
+      <h2>Admin Panel</h2>
+      <p>Welcome, {user.name}</p>
+      <ul>
+        <li>Promote User</li>
+        <li>Delete User</li>
+        <li>View Users</li>
+      </ul>
+      <Link to="/admin/verification" className="download-link">
+        View pending verification requests
+      </Link>
     </div>
   );
 }

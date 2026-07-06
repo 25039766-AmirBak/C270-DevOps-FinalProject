@@ -1,33 +1,9 @@
-.app-shell {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.main-content {
   min-height: 80vh;
   padding: 2rem;
-}
-
-.navbar {
   display: flex;
   justify-content: center;
-  gap: 1rem;
-  padding: 1rem;
-  background: #f7f7ff;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.navbar a {
-  text-decoration: none;
-  color: #4b3f72;
-  font-weight: 600;
-}
-
-.logout-btn {
-  border: none;
-  background: #c0392b;
-  color: white;
-  padding: 0.45rem 0.8rem;
-  border-radius: 6px;
-  cursor: pointer;
+  align-items: flex-start;
 }
 
 .page-card {
@@ -36,12 +12,16 @@
   padding: 2rem;
   border-radius: 12px;
   background: white;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
 .page-card ul {
   text-align: left;
   padding-left: 1.2rem;
+}
+
+.page-card.admin-verification {
+  max-width: 700px;
 }
 
 .auth-form {
@@ -50,24 +30,22 @@
   gap: 0.8rem;
 }
 
-.auth-form input {
+.auth-form input,
+.auth-form select {
   padding: 0.8rem;
   border: 1px solid #ccc;
   border-radius: 8px;
 }
 
-.auth-form button {
-  padding: 0.8rem;
-  border: none;
-  border-radius: 8px;
-  background: #6c63ff;
-  color: white;
-  cursor: pointer;
+.auth-form input:focus,
+.auth-form select:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -1px;
 }
 
 .message {
   margin-top: 0.8rem;
-  color: #2f7d32;
+  color: var(--primary-color);
 }
 
 .error-text {
@@ -75,10 +53,6 @@
   color: #c0392b;
   font-size: 0.9rem;
   text-align: left;
-}
-
-.admin-verification {
-  max-width: 700px;
 }
 
 .verification-list {
@@ -107,7 +81,7 @@
 
 .verification-name {
   font-weight: 700;
-  color: #322a57;
+  color: var(--text-dark);
 }
 
 .verification-status {
@@ -138,10 +112,17 @@
 }
 
 .approve-btn {
-  background: #2f9e44;
+  background: var(--primary-color);
+}
+
+.approve-btn:hover {
+  background: #1b5e20;
 }
 
 .reject-btn {
   background: #e03131;
 }
 
+.reject-btn:hover {
+  background: #b71c1c;
+}

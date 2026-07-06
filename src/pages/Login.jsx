@@ -65,7 +65,7 @@ function Login() {
           onChange={handleChange}
         />
         {errors.password && <p className="error-text">{errors.password}</p>}
-        <button type="submit">Login</button>
+        <button type="submit" className="btn btn-primary">Login</button>
       </form>
       {message && <p className="message">{message}</p>}
       <p>

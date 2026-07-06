@@ -4,39 +4,93 @@ import authService from '../services/authService';
 function Dashboard() {
   const [user, setUser] = useState(null);
   const [message, setMessage] = useState('');
+  const [file, setFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    if (!token) return;
+    authService
+      .getProfile(token)
+      .then((res) => setUser(res.data.user))
+      .catch((err) => setMessage(err.response?.data?.message || 'Unable to load profile'));
+  }, [token]);
 
-    if (!token) {
-      setMessage('No token found. Please log in again.');
-      return;
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    if (!file || !token) return;
+    setUploading(true);
+    try {
+      const res = await authService.uploadDocument(file, token);
+      setMessage(res.data.message);
+      setFile(null);
+      const profile = await authService.getProfile(token);
+      setUser(profile.data.user);
+    } catch (err) {
+      setMessage(err.response?.data?.message || 'Upload failed');
+    } finally {
+      setUploading(false);
     }
+  };
 
-    const fetchProfile = async () => {
-      try {
-        const res = await authService.getProfile(token);
-        setUser(res.data);
-      } catch (error) {
-        setMessage(error.response?.data?.message || 'Unable to load profile');
-      }
-    };
+  if (!token) {
+    return (
+      <div className="page-card">
+        <h2>Dashboard</h2>
+        <p>No token found. Please log in again.</p>
+      </div>
+    );
+  }
 
-    fetchProfile();
-  }, []);
+  if (!user) {
+    return (
+      <div className="page-card">
+        <h2>Dashboard</h2>
+        <p>{message || 'Loading profile...'}</p>
+      </div>
+    );
+  }
+
+  const needsDocuments =
+    ['Recipient', 'Volunteer'].includes(user.role) && user.verificationStatus === 'Not Submitted';
 
   return (
     <div className="page-card">
       <h2>Dashboard</h2>
-      {user ? (
-        <>
-          <p>Welcome {user.name}</p>
-          <p>Email: {user.email}</p>
-          <p>Role: {user.role}</p>
-        </>
-      ) : (
-        <p>{message || 'Loading profile...'}</p>
+      <p><strong>{user.name}</strong></p>
+      <p>Email: {user.email}</p>
+      <p>Role: {user.role}</p>
+      <p>
+        Verification:{' '}
+        <span
+          style={{
+            color:
+              user.verificationStatus === 'Verified'
+                ? '#2f9e44'
+                : user.verificationStatus === 'Rejected'
+                  ? '#e03131'
+                  : '#8a6f00',
+          }}
+        >
+          {user.verificationStatus}
+        </span>
+      </p>
+
+      {needsDocuments && (
+        <form onSubmit={handleUpload} className="auth-form" style={{ marginTop: '1rem' }}>
+          <p>Upload a supporting document to begin verification:</p>
+          <input
+            type="file"
+            accept=".jpg,.jpeg,.png,.pdf"
+            onChange={(e) => setFile(e.target.files[0])}
+          />
+          <button type="submit" className="btn btn-primary" disabled={!file || uploading}>
+            {uploading ? 'Uploading...' : 'Upload Document'}
+          </button>
+        </form>
       )}
+      {message && <p className="message">{message}</p>}
     </div>
   );
 }
