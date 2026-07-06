@@ -1,4 +1,3 @@
-// Defines the user schema and password hashing behavior for authentication.
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
@@ -16,47 +15,36 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
     },
-    passwordHash: {
+    password: {
       type: String,
       required: true,
       minlength: 8,
+      select: false,
     },
     role: {
       type: String,
       enum: ['Donor', 'Recipient', 'Volunteer', 'Admin'],
       default: 'Recipient',
     },
-        verificationStatus: {
-        type: String,
-        enum: ['Not Submitted','Pending','Verified','Rejected'],
-        default: 'Not Submitted'
+    verificationStatus: {
+      type: String,
+      enum: ['Not Submitted', 'Pending', 'Verified', 'Rejected'],
+      default: 'Not Submitted',
     },
-
-    fasDocument: {
-        type: String
-    }
+    document: {
+      type: String,
+    },
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
-    return next();
-  }
-
-  try {
-    const saltRounds = 10;
-    this.passwordHash = await bcrypt.hash(this.password, saltRounds);
-    next();
-  } catch (error) {
-    next(error);
-  }
+userSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
+  this.password = await bcrypt.hash(this.password, 10);
 });
 
-userSchema.methods.comparePassword = async function (candidatePassword) {
-  return bcrypt.compare(candidatePassword, this.passwordHash);
+userSchema.methods.comparePassword = async function (candidate) {
+  return bcrypt.compare(candidate, this.password);
 };
 
 module.exports = mongoose.model('User', userSchema);
