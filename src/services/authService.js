@@ -12,6 +12,15 @@ const authService = {
   getProfile: (token) =>
     API.get('/profile', { headers: { Authorization: `Bearer ${token}` } }),
 
+  getAllUsers: (token) =>
+    API.get('/users', { headers: { Authorization: `Bearer ${token}` } }),
+
+  deleteUser: (userId, token) =>
+    API.delete(`/users/${userId}`, { headers: { Authorization: `Bearer ${token}` } }),
+
+  promoteUser: (userId, token) =>
+    API.put(`/promote/${userId}`, {}, { headers: { Authorization: `Bearer ${token}` } }),
+
   uploadDocument: (file, token) => {
     const fd = new FormData();
     fd.append('document', file);

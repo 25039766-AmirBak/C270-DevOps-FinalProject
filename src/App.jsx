@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Admin from './pages/Admin';
+import AdminUsers from './pages/AdminUsers';
 import AdminVerification from './pages/AdminVerification';
 
 function Home() {
@@ -36,6 +37,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Admin />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute>
+                  <AdminUsers />
                 </ProtectedRoute>
               }
             />

@@ -126,3 +126,38 @@
 .reject-btn:hover {
   background: #b71c1c;
 }
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.admin-table th,
+.admin-table td {
+  text-align: left;
+  padding: 0.6rem 0.4rem;
+  border-bottom: 1px solid #e4e4e4;
+}
+
+.admin-table th {
+  font-weight: 700;
+  color: var(--text-dark);
+  white-space: nowrap;
+}
+
+.admin-table td {
+  vertical-align: middle;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: nowrap;
+}
+
+.actions-cell .approve-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

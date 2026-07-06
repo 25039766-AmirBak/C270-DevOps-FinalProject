@@ -21,7 +21,7 @@ function Navbar() {
 
   return (
     <nav className="global-navbar">
-      <Link to="/" className="logo">FoodShare</Link>
+      <Link to="/" className="logo">Shareplate</Link>
       {token ? (
         <div className="nav-links">
           <Link to="/dashboard">Dashboard</Link>

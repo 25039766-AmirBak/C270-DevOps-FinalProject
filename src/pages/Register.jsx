@@ -5,7 +5,7 @@ import authService from '../services/authService';
 const ROLES = [
   { value: 'Recipient', label: 'Recipient', needsDocs: true, docMessage: 'Please provide your FAS approval letter with NRIC blurred out to verify low income status.' },
   { value: 'Volunteer', label: 'Volunteer', needsDocs: true, docMessage: 'Please provide a picture of your NRIC with your NRIC blurred out to prove your identity.' },
-  { value: 'Donor', label: 'Donor', needsDocs: false },
+  { value: 'Donor', label: 'Donor', needsDocs: true, docMessage: 'Please present your Letter of Authorization.' },
 ];
 
 function Register() {
@@ -25,8 +25,16 @@ function Register() {
   const validate = () => {
     const newErrors = {};
     if (!formData.name.trim()) newErrors.name = 'Full name is required';
-    if (!formData.email.trim()) newErrors.email = 'Email is required';
-    if (!formData.password.trim()) newErrors.password = 'Password is required';
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = 'Invalid email address';
+    }
+    if (!formData.password.trim()) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Password must be at least 8 characters';
+    }
     if (selectedRole?.needsDocs && !file) newErrors.file = 'Supporting document is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;

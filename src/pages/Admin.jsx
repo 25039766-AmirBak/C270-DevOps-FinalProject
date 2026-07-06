@@ -46,14 +46,14 @@ function Admin() {
     <div className="page-card">
       <h2>Admin Panel</h2>
       <p>Welcome, {user.name}</p>
-      <ul>
-        <li>Promote User</li>
-        <li>Delete User</li>
-        <li>View Users</li>
-      </ul>
-      <Link to="/admin/verification" className="download-link">
-        View pending verification requests
-      </Link>
+      <nav style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
+        <Link to="/admin/users" className="download-link">
+          Manage Users
+        </Link>
+        <Link to="/admin/verification" className="download-link">
+          View pending verification requests
+        </Link>
+      </nav>
     </div>
   );
 }
