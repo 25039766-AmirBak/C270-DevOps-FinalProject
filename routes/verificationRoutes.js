@@ -1,4 +1,6 @@
 const router = require('express').Router();
+const path = require('path');
+const fs = require('fs');
 const auth = require('../middleware/authMiddleware');
 const { admin } = auth;
 const upload = require('../middleware/upload');
@@ -29,6 +31,13 @@ router.patch('/:id', auth, admin, async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
     user.verificationStatus = status;
+
+    if (user.document) {
+      const filePath = path.join(__dirname, '..', 'uploads', user.document);
+      fs.unlink(filePath, () => {});
+      user.document = undefined;
+    }
+
     await user.save();
     res.status(200).json({
       message: `Verification status updated to ${status}`,
