@@ -1,164 +1,178 @@
-import { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import React, { useState, useEffect } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import L from "leaflet";
 
-// Fix Vite asset compilation path issues for default marker icons
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-
+// Fix Leaflet's default marker icon paths so they render correctly in React/Vite
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
-  iconRetinaUrl: markerIcon2x,
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-// Helper component to handle smooth panning when an address is searched manually
-const ChangeMapView = ({ center }) => {
+// Helper component to smoothly pan the map viewport when searching neighborhoods
+function ChangeView({ center }) {
   const map = useMap();
-  map.setView(center, 14);
+  useEffect(() => {
+    if (center) {
+      map.setView(center, 14, { animate: true });
+    }
+  }, [center, map]);
   return null;
-};
+}
 
-const DonationMap = () => {
+export default function DonationMap() {
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [addressQuery, setAddressQuery] = useState('');
-  const [mapCenter, setMapCenter] = useState([1.3521, 103.8198]); // Singapore Default Center
-  const [geocodingError, setGeocodingError] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [mapCenter, setMapCenter] = useState([1.3521, 103.8198]); // Centers on Singapore
+  const [searchError, setSearchError] = useState("");
 
+  // Fetch donation entries from backend, with local mockup backup fallback
   useEffect(() => {
-    const loadDonationsAndGeocode = async () => {
+    const fetchDonationPins = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/donations');
+        const response = await fetch("http://localhost:5000/api/donations");
+        if (!response.ok) throw new Error("Backend server network error");
         const data = await response.json();
         
-        // Filter for active postings
-        const activePostings = data.filter(item => item.status === 'Available');
-
-        // Geocode every text address on-the-fly
-        const geocodedPostings = [];
-        
-        for (const donation of activePostings) {
-          try {
-            // Encode the string address safely
-            const queryUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(donation.location + ', Singapore')}&limit=1`;
-            
-            const geoResponse = await fetch(queryUrl, {
-              headers: { 'User-Agent': 'SharePlate-Food-Donation-App' }
-            });
-            const geoResult = await geoResponse.json();
-
-            // If coordinates are successfully found, attach them to our localized data object
-            if (geoResult && geoResult.length > 0) {
-              geocodedPostings.push({
-                ...donation,
-                coordinates: [parseFloat(geoResult[0].lat), parseFloat(geoResult[0].lon)]
-              });
-            } else {
-              console.warn(`Could not geocode address: ${donation.location}`);
-            }
-          } catch (err) {
-            console.error(`Error geocoding item ${donation._id}:`, err);
-          }
-          
-          // Small delay to respect Nominatim's fair-use rate limits
-          await new Promise(resolve => setTimeout(resolve, 500));
+        // If backend is running but database collection is completely empty, use mock items
+        if (!data || data.length === 0) {
+          useMockFallback("No active entries in database. Showing demo markers!");
+        } else {
+          setDonations(data);
         }
-
-        setDonations(geocodedPostings);
-        setLoading(false);
-      } catch (error) {
-        console.error('Failed to retrieve or process donation listings:', error);
+      } catch (err) {
+        useMockFallback(`Backend unreachable (${err.message}). Showing demo markers!`);
+      } finally {
         setLoading(false);
       }
     };
 
-    loadDonationsAndGeocode();
+    const useMockFallback = (logMessage) => {
+      console.warn(logMessage);
+      setDonations([
+        {
+          _id: "demo-1",
+          title: "Surplus Bento Meals",
+          quantity: 15,
+          location: "Woodlands MRT Station, Singapore",
+          expiryDate: "2026-07-15",
+          coordinates: [1.4368, 103.7865] // Prefetched safe coordinates
+        },
+        {
+          _id: "demo-2",
+          title: "Fresh Whole Apples",
+          quantity: 40,
+          location: "Ang Mo Kio Hub, Singapore",
+          expiryDate: "2026-07-20",
+          coordinates: [1.3694, 103.8495] // Prefetched safe coordinates
+        }
+      ]);
+    };
+
+    fetchDonationPins();
   }, []);
 
-  // Manual search bar handler
-  const handleAddressSearch = async (e) => {
+  // Handle manual neighborhood address searches via OpenStreetMap Nominatim API
+  const handleSearch = async (e) => {
     e.preventDefault();
-    if (!addressQuery.trim()) return;
+    if (!searchQuery.trim()) return;
+    setSearchError("");
 
-    setGeocodingError('');
     try {
-      const searchUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(addressQuery + ', Singapore')}&limit=1`;
-      
-      const response = await fetch(searchUrl, {
-        headers: { 'User-Agent': 'SharePlate-Food-Donation-App' } 
-      });
-      const results = await response.json();
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          searchQuery + ", Singapore"
+        )}`
+      );
+      const data = await response.json();
 
-      if (results && results.length > 0) {
-        const { lat, lon } = results[0];
-        setMapCenter([parseFloat(lat), parseFloat(lon)]);
+      if (data && data.length > 0) {
+        const lat = parseFloat(data[0].lat);
+        const lon = parseFloat(data[0].lon);
+        setMapCenter([lat, lon]);
       } else {
-        setGeocodingError('Address not found. Try entering a postal code or building name.');
+        setSearchError("Location not found. Try another landmark or postal code!");
       }
-    } catch (error) {
-      console.error('Geocoding error:', error);
-      setGeocodingError('Error connecting to geocoding server.');
+    } catch (err) {
+      setSearchError("Search service currently busy. Please try again.");
     }
   };
 
   if (loading) {
-    return <div style={{ padding: '20px', textAlign: 'center' }}>Converting locations and loading live map...</div>;
+    return (
+      <div style={{ textAlign: "center", padding: "40px", fontSize: "1.2rem", color: "#6B7280" }}>
+        Loading Distribution Map System...
+      </div>
+    );
   }
 
   return (
-    <div style={{ maxWidth: '1000px', margin: '0 auto', fontFamily: 'sans-serif' }}>
+    <div style={{ background: "white", padding: "20px", borderRadius: "12px", boxShadow: "0 4px 6px rgba(0,0,0,0.05)" }}>
       
-      <form onSubmit={handleAddressSearch} style={{ marginBottom: '15px', display: 'flex', gap: '10px' }}>
+      {/* Search Layout Panel */}
+      <form onSubmit={handleSearch} style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
         <input
           type="text"
-          placeholder="Enter donor address (e.g., Woodlands, Republic Polytechnic)..."
-          value={addressQuery}
-          onChange={(e) => setAddressQuery(e.target.value)}
-          style={{ flex: 1, padding: '10px', borderRadius: '4px', border: '1px solid #ccc' }}
+          placeholder="Search Singapore neighborhood, landmark or postal code..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{
+            flex: 1,
+            padding: "12px",
+            border: "1px solid #D1D5DB",
+            borderRadius: "6px",
+            fontSize: "1rem"
+          }}
         />
-        <button type="submit" style={{ padding: '10px 20px', borderRadius: '4px', cursor: 'pointer', backgroundColor: '#2c3e50', color: 'white', border: 'none' }}>
+        <button
+          type="submit"
+          className="btn btn-secondary"
+          style={{ border: "none", cursor: "pointer" }}
+        >
           Search Location
         </button>
       </form>
 
-      {geocodingError && <p style={{ color: 'red', marginTop: '-10px', marginBottom: '15px' }}>{geocodingError}</p>}
+      {searchError && (
+        <p style={{ color: "#EF4444", marginTop: "-12px", marginBottom: "15px", fontSize: "0.9rem" }}>
+          ⚠️ {searchError}
+        </p>
+      )}
 
-      <div style={{ height: '550px', width: '100%', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-        <MapContainer 
-          center={mapCenter} 
-          zoom={12} 
-          style={{ height: '100%', width: '100%' }}
-        >
+      {/* Interactive Map Canvas Container */}
+      <div style={{ height: "550px", width: "100%", borderRadius: "8px", overflow: "hidden", border: "1px solid #E5E7EB" }}>
+        <MapContainer center={mapCenter} zoom={11} style={{ height: "100%", width: "100%" }}>
+          <ChangeView center={mapCenter} />
           <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           />
 
-          <ChangeMapView center={mapCenter} />
+          {/* Map Marker Pins Plotter */}
+          {donations.map((item) => {
+            // Check fallback fields or backend coordinates array field options
+            const pinPosition = item.coordinates || 
+              (item.lat && item.lng ? [item.lat, item.lng] : [1.4368, 103.7865]);
 
-          {donations.map((donation) => (
-            <Marker 
-              key={donation._id} 
-              position={donation.coordinates} // Uses our freshly compiled coordinates array [Lat, Lon]
-            >
-              <Popup>
-                <div style={{ minWidth: '150px' }}>
-                  <h4 style={{ margin: '0 0 6px 0', fontSize: '16px' }}>{donation.foodName}</h4>
-                  <p style={{ margin: '0 0 4px 0', fontSize: '14px' }}><strong>Quantity:</strong> {donation.quantity}</p>
-                  <p style={{ margin: '0 0 4px 0', fontSize: '14px' }}>📍 {donation.location}</p>
-                  <small style={{ color: '#666' }}>Expires: {new Date(donation.expiryDate).toLocaleDateString()}</small>
-                </div>
-              </Popup>
-            </Marker>
-          ))}
+            return (
+              <Marker key={item._id} position={pinPosition}>
+                <Popup>
+                  <div style={{ fontSize: "0.95rem", lineHeight: "1.4" }}>
+                    <h3 style={{ margin: "0 0 6px 0", color: "#2E7D32" }}>{item.title}</h3>
+                    <p style={{ margin: "0 0 4px 0" }}><strong>Quantity:</strong> {item.quantity}</p>
+                    <p style={{ margin: "0 0 4px 0", color: "#4B5563" }}>📍 {item.location}</p>
+                    <p style={{ margin: "0", fontSize: "0.85rem", color: "#9CA3AF" }}>
+                      Expires: {new Date(item.expiryDate).toLocaleDateString()}
+                    </p>
+                  </div>
+                </Popup>
+              </Marker>
+            );
+          })}
         </MapContainer>
       </div>
     </div>
   );
-};
-
-export default DonationMap;
+}
