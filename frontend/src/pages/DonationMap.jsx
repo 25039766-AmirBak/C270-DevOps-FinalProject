@@ -10,7 +10,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-// View wrapper to handle map repositioning
+// View wrapper to handle map repositioning smoothly when center changes
 function ChangeView({ center }) {
   const map = useMap();
   useEffect(() => {
@@ -97,7 +97,8 @@ export default function DonationMap() {
       {searchError && <p style={{ color: "red", fontSize: "0.9rem" }}>{searchError}</p>}
 
       <div style={{ height: "500px", width: "100%", borderRadius: "8px", overflow: "hidden" }}>
-        <MapContainer key={`${mapCenter[0]}-${mapCenter[1]}`} center={mapCenter} zoom={11} style={{ height: "100%", width: "100%" }}>
+        {/* 📍 STATIC KEY APPLIED BELOW TO SOLVE MAP DOUBLE-INITIALIZATION CRASH */}
+        <MapContainer key="shareplate-map" center={mapCenter} zoom={11} style={{ height: "100%", width: "100%" }}>
           <ChangeView center={mapCenter} />
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
