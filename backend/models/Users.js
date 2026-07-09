@@ -16,20 +16,30 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
 
-    passwordHash: {
+    password: {
       type: String,
       required: true,
-      minlength:8
+      minlength:8,
+      select: false
     },
 
     role: {
       type: String,
       enum: ["Donor", "Recipient", "Volunteer", "Admin"],
       default: "Recipient"
-    }
-  },
+    },
+    verificationStatus: {
+      type: String,
+      enum: ['Not Submitted','Pending','Verified','Rejected'],
+      default: 'Not Submitted'
+     },
+    
+    document: {
+      type: String
+      }
+    },
   {
-    timestamps: true
+   timestamps: true
   }
 );
 
