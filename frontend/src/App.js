@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
     
 // Placeholder imports for the team's pages
 import Home from './pages/Home';        
@@ -8,7 +9,14 @@ import PostDonation from './pages/PostDonation';
 // import Request from './pages/Request';     
 // import MapView from './pages/Map';         
 // import Volunteer from './pages/Volunteer'; 
-// import Login from './pages/Login';         
+
+// Auth pages
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import Admin from './pages/Admin';
+import AdminUsers from './pages/AdminUsers';
+import AdminVerification from './pages/AdminVerification';
 
 function App() {
   return (
@@ -26,7 +34,14 @@ function App() {
           {/* <Route path="request" element={<Request />} /> */}
           {/* <Route path="map" element={<MapView />} /> */}
           {/* <Route path="volunteer" element={<Volunteer />} /> */}
-          {/* <Route path="login" element={<Login />} /> */}
+
+          {/* Auth Routes */}
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
+          <Route path="dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+          <Route path="admin/users" element={<ProtectedRoute><AdminUsers /></ProtectedRoute>} />
+          <Route path="admin/verification" element={<ProtectedRoute><AdminVerification /></ProtectedRoute>} />
           
         </Route>
       </Routes>
