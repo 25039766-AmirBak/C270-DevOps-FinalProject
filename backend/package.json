@@ -1,0 +1,24 @@
+{
+  "name": "food-donation-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Food Donation web application",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --check server.js && node --check routes/donationRoutes.js && node --check models/Donation.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@google/genai": "^2.10.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.7.3"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  }
+}
