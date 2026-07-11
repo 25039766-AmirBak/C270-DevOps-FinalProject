@@ -1,23 +1,40 @@
 pipeline {
     agent any
-    
-    // This block tells Jenkins to load the Node tool
+
     tools {
         nodejs 'NodeJS' 
     }
-    
+
     stages {
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
                 checkout scm
             }
         }
-        stage('Build Backend') {
+
+        stage('Backend Foundation') {
             steps {
-                // This tells Jenkins to go inside the backend folder first
                 dir('backend') {
-                    echo 'Installing backend dependencies...'
                     sh 'npm install'
+                }
+            }
+        }
+
+        stage('Frontend Compilation') {
+            steps {
+                dir('frontend') {
+                    sh 'npm install'
+                    sh 'npm run build'
+                }
+            }
+        }
+
+        stage('Frontend Testing') {
+            steps {
+                dir('frontend') {
+                    // CI=true forces the test runner to execute once and exit, 
+                    // preventing the pipeline from hanging infinitely.
+                    sh 'CI=true npm test'
                 }
             }
         }
