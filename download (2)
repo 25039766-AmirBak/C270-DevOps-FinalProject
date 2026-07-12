@@ -1,0 +1,195 @@
+.schedule-page {
+  min-height: 100vh;
+  background: var(--color-paper);
+  padding-bottom: 60px;
+}
+
+.schedule-header {
+  padding: 32px 32px 8px;
+}
+
+.eyebrow {
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-amber-dark);
+  margin-bottom: 8px;
+}
+
+.schedule-header h1 {
+  font-family: var(--font-display);
+  font-size: 30px;
+  color: var(--color-forest-dark);
+  margin: 0;
+}
+
+/* Volunteer identity mini-form */
+.volunteer-id-form {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px 32px;
+}
+
+.volunteer-id-form .form-row {
+  flex: 1 1 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.volunteer-id-form label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.volunteer-id-form input {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--color-line);
+  font-size: 14px;
+  font-family: inherit;
+  background: white;
+}
+
+.volunteer-id-form input:focus {
+  outline: 2px solid var(--color-forest);
+  outline-offset: 1px;
+}
+
+.status-msg {
+  padding: 0 32px;
+  color: var(--color-ink-soft);
+}
+
+.status-msg.error {
+  color: #c0392b;
+  font-weight: 600;
+}
+
+/* Date chip selector, styled after the MOW reference screenshot */
+.date-selector {
+  display: flex;
+  gap: 10px;
+  padding: 16px 32px;
+  overflow-x: auto;
+}
+
+.date-chip {
+  flex: 0 0 auto;
+  background: white;
+  border: 1px solid var(--color-line);
+  border-radius: 14px;
+  padding: 14px 20px;
+  text-align: center;
+  cursor: pointer;
+  min-width: 72px;
+  font-family: inherit;
+}
+
+.date-chip.active {
+  background: var(--color-forest);
+  border-color: var(--color-forest);
+}
+
+.date-chip.active .date-num,
+.date-chip.active .date-label {
+  color: white;
+}
+
+.date-num {
+  display: block;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.date-label {
+  display: block;
+  font-size: 13px;
+  margin-top: 2px;
+  color: var(--color-ink-soft);
+}
+
+/* Location sections + slot cards */
+.location-section {
+  padding: 20px 32px 8px;
+}
+
+.location-section h2 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--color-ink);
+  margin: 0 0 14px;
+}
+
+.slot-cards {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.slot-card {
+  flex: 1 1 170px;
+  border-radius: 16px;
+  padding: 22px;
+  color: white;
+  min-width: 160px;
+}
+
+.slot-card.morning {
+  background: var(--color-morning);
+}
+
+.slot-card.afternoon {
+  background: var(--color-afternoon);
+}
+
+.slot-card.evening {
+  background: var(--color-evening);
+}
+
+.slot-name {
+  display: block;
+  font-size: 14px;
+  opacity: 0.9;
+  margin-bottom: 4px;
+}
+
+.slot-status {
+  display: block;
+  font-size: 19px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.book-btn {
+  background: white;
+  color: var(--color-ink);
+  border: none;
+  border-radius: 20px;
+  padding: 9px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.book-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .schedule-header,
+  .volunteer-id-form,
+  .date-selector,
+  .location-section,
+  .status-msg {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
