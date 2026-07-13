@@ -9,21 +9,33 @@ if (!globalThis.crypto) {
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const path = require('path');
 require("dotenv").config();
 
 // Routes
 const donationRoutes = require("./routes/donationRoutes");
 const requestRoutes = require("./routes/requestRoutes");
+const authRoutes = require("./routes/authRoutes");
+const verificationRoutes = require("./routes/verificationRoutes");
+
+// Models
+const User = require('./models/Users');
+const Donation = require('./models/Donation');
+const Request = require('./models/Request');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+// Expose the uploads folder to the public
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API Endpoints
 app.use("/api/donations", donationRoutes);
 app.use("/api/requests", requestRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/verification", verificationRoutes);
 
 app.get("/", (req, res) => {
   res.send("Food Donation API is running");
@@ -41,6 +53,33 @@ mongoose
   .catch((error) => {
     console.error("MongoDB connection error:", error.message);
   });
+
+app.get('/api/stats', async (req, res) => {
+  try {
+    // 1. Count how many total donations exist (or sum up their quantities)
+    const mealsRescued = await Donation.countDocuments(); 
+    
+    // 2. Count how many users have the 'Volunteer' role AND are 'Verified'
+    const activeVolunteers = await User.countDocuments({ 
+        role: { $in: ['Volunteer'] }, 
+        verificationStatus: 'Verified' 
+    });
+
+    // 3. Count how many requests are currently sitting as 'Pending'
+    const pendingRequests = await Request.countDocuments({ 
+        status: 'Pending' 
+    });
+
+    // Send it back to the React frontend
+    res.status(200).json({
+        mealsRescued: mealsRescued,
+        activeVolunteers: activeVolunteers,
+        pendingRequests: pendingRequests
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch live stats', error: error.message });
+  }
+});
 
 // --- AI INTEGRATION ---
 const { GoogleGenAI } = require('@google/genai');

@@ -123,19 +123,27 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
-exports.promoteToAdmin = async (req, res) => {
+exports.updateUserRoles = async (req, res) => {
   try {
+    const { roles } = req.body;
+    
+    // 1. Ensure the Admin sent a valid array with at least one role
+    if (!roles || !Array.isArray(roles) || roles.length === 0) {
+      return res.status(400).json({ message: 'You must provide an array of roles.' });
+    }
+
+    // 2. Find the user
     const user = await User.findById(req.params.userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    if (user.role === 'Admin') {
-      return res.status(200).json({ message: 'User is already an admin' });
-    }
-    user.role = 'Admin';
+
+    // 3. Update the array and save
+    user.role = roles;
     await user.save();
-    res.status(200).json({ message: 'User promoted to admin successfully' });
+
+    res.status(200).json({ message: 'Roles updated successfully', role: user.role });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to promote user', error: error.message });
+    res.status(500).json({ message: 'Failed to update roles', error: error.message });
   }
 };

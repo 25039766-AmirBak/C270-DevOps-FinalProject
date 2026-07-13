@@ -26,7 +26,8 @@ const auth = async (req, res, next) => {
 };
 
 const admin = (req, res, next) => {
-  if (req.user.role !== 'Admin') {
+  // Use .includes() for arrays instead of !==
+  if (!req.user.role.includes('Admin')) { 
     return res.status(403).json({ message: 'Admin access required' });
   }
   next();
@@ -34,7 +35,11 @@ const admin = (req, res, next) => {
 
 const verified = (req, res, next) => {
   const requiresVerification = ['Recipient', 'Volunteer'];
-  if (requiresVerification.includes(req.user.role) && req.user.verificationStatus !== 'Verified') {
+  
+  // Check if any of the user's roles are in the requiresVerification array
+  const needsVerification = req.user.role.some(role => requiresVerification.includes(role));
+  
+  if (needsVerification && req.user.verificationStatus !== 'Verified') {
     return res.status(403).json({ message: 'Account must be verified to access this resource' });
   }
   next();

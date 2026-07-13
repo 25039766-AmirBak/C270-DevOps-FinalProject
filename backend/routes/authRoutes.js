@@ -1,5 +1,5 @@
 ﻿const express = require('express');
-const { register, login, getProfile, getAllUsers, deleteUser, promoteToAdmin } = require('../controllers/authControllers');
+const { register, login, getProfile, getAllUsers, deleteUser, updateUserRoles } = require('../controllers/authControllers');
 const auth = require('../middleware/authMiddleware');
 const { admin } = auth;
 
@@ -10,6 +10,6 @@ router.post('/login', login);
 router.get('/profile', auth, getProfile);
 router.get('/users', auth, admin, getAllUsers);
 router.delete('/users/:userId', auth, admin, deleteUser);
-router.put('/promote/:userId', auth, admin, promoteToAdmin);
+router.patch('/users/:userId/roles', auth, admin, updateUserRoles);
 
 module.exports = router;
