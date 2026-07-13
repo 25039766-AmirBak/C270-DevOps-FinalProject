@@ -10,8 +10,8 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null); 
 
   // --- DEMO FUNCTIONS FOR CA2 PRESENTATION ---
-  const loginAs = (role) => {
-    setUser({ name: 'Demo User', role: role });
+  const loginAs = (rolesArray) => {
+    setUser({ name: 'Super User', roles: rolesArray });
   };
 
   const logout = () => {
