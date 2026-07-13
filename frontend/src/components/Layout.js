@@ -2,7 +2,6 @@ import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import AiChatbotWidget from './AiChatbotWidget';
 import { useAuth } from '../context/AuthContext'; // Import the hook
-import '../global.css';
 
 const Layout = () => {
   const { user, logout, loginAs } = useAuth(); 
@@ -10,7 +9,13 @@ const Layout = () => {
   // --- State to track which checkboxes are ticked ---
   const [demoRoles, setDemoRoles] = useState([]);
 
+  const [adminMenuOpen, setAdminMenuOpen] = useState(false); // <-- Tracks the dropdown
+
   const navigate = useNavigate();
+
+  // Safely handles both the backend (user.role) and the CA2 Demo Tool (user.roles)
+  const rawRole = user?.role || user?.roles || [];
+  const activeRoles = Array.isArray(rawRole) ? rawRole : [rawRole];
 
   // --- Custom Logout Handler ---
   const handleLogout = () => {
@@ -50,17 +55,64 @@ const Layout = () => {
           <Link to="/map">Map</Link> {/* Map is usually public for transparency */}
 
           {/* Conditional Rendering based on Role */}
-          {user?.roles?.includes('donator') && <Link to="/donate">Donate</Link>}
-          {user?.roles?.includes('requester') && <Link to="/request">Request</Link>}
-          {user?.roles?.includes('volunteer') && <Link to="/volunteer">Volunteer</Link>}
+          {activeRoles.includes('Donor') && <Link to="/donate">Donate</Link>}
+          {activeRoles.includes('Recipient') && <Link to="/request">Request</Link>}
+          {activeRoles.includes('Volunteer') && <Link to="/volunteer">Volunteer</Link>}
+
+          {/* Grouped Logged-In & Admin Links */}
+          {user && (
+            <div style={{ display: 'flex', gap: '25px', borderLeft: '2px solid rgba(255,255,255,0.3)', paddingLeft: '25px', alignItems: 'center' }}>
+              <Link to="/dashboard" style={{ fontWeight: 'bold', color: '#d1fae5' }}>Dashboard</Link>
+              
+              {activeRoles.includes('Admin') && (
+                <div 
+                  style={{ position: 'relative' }}
+                  onMouseEnter={() => setAdminMenuOpen(true)}
+                  onMouseLeave={() => setAdminMenuOpen(false)}
+                >
+                  {/* The Dropdown Trigger */}
+                  <span style={{ color: '#F57C00', fontWeight: 'bold', cursor: 'pointer', padding: '10px 0' }}>
+                    Admin Tools ▼
+                  </span>
+                  
+                  {/* The Floating Dropdown Menu */}
+                  {adminMenuOpen && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      backgroundColor: '#1F2937', /* Dark background so white links show up */
+                      minWidth: '180px',
+                      borderRadius: '8px',
+                      padding: '15px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '15px',
+                      boxShadow: '0 8px 16px rgba(0,0,0,0.3)',
+                      marginTop: '10px',
+                      zIndex: 1000,
+                      textAlign: 'center'
+                    }}>
+                      <Link to="/admin" style={{ color: '#F57C00', fontWeight: 'bold' }}>Admin Panel</Link>
+                      <Link to="/admin/users">Manage Users</Link>
+                      <Link to="/admin/verification">Verifications</Link>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="auth-links">
            {user ? (
              <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-               <span style={{ fontSize: '0.85rem', color: '#9CA3AF' }}>
-                Logged in as: {user?.roles?.join(', ')}
-              </span>
+               
+               {/* Now uses activeRoles so it works for real users AND Demo users */}
+               <span style={{ fontSize: '0.85rem', color: '#9CA3AF', marginLeft: '10px' }}>
+                Logged in as: {activeRoles.join(', ')}
+               </span>
                <button onClick={handleLogout} className="btn-logout">Logout</button>
              </div>
            ) : (
@@ -78,26 +130,26 @@ const Layout = () => {
           <label style={{ marginRight: '15px', cursor: 'pointer' }}>
             <input 
               type="checkbox" 
-              value="donator" 
-              checked={demoRoles.includes('donator')} 
+              value="Donor" 
+              checked={demoRoles.includes('Donor')} 
               onChange={handleRoleToggle} 
-            /> Donator
+            /> Donor
           </label>
           
           <label style={{ marginRight: '15px', cursor: 'pointer' }}>
             <input 
               type="checkbox" 
-              value="requester" 
-              checked={demoRoles.includes('requester')} 
+              value="Recipient" 
+              checked={demoRoles.includes('Recipient')} 
               onChange={handleRoleToggle} 
-            /> Requester
+            /> Recipient
           </label>
           
           <label style={{ marginRight: '15px', cursor: 'pointer' }}>
             <input 
               type="checkbox" 
-              value="volunteer" 
-              checked={demoRoles.includes('volunteer')} 
+              value="Volunteer" 
+              checked={demoRoles.includes('Volunteer')} 
               onChange={handleRoleToggle} 
             /> Volunteer
           </label>

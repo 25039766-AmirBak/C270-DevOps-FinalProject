@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
+import '../styles/donation.css';
 
 function PostDonation() {
   const [formData, setFormData] = useState({

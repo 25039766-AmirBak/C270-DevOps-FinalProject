@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import DonationTable from '../components/DonationTable';
-import '../requestsystem.css';
+import '../styles/request.css';
 
 const RequestPage = () => {
     const [donations, setDonations] = useState([]);

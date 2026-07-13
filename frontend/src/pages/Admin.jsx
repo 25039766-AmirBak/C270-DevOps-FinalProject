@@ -33,7 +33,7 @@ function Admin() {
     );
   }
 
-  if (user.role !== 'Admin') {
+  if (!user.role.includes('Admin')) {
     return (
       <div className="page-card">
         <h2>Admin Panel</h2>

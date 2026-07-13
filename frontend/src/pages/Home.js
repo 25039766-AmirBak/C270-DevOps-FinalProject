@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import '../styles/home.css';
 
 const Home = () => {
     // 1. Repurposing your InventoryStats logic for a "Live Impact" banner
@@ -27,24 +28,27 @@ const Home = () => {
     }, [bannerImages.length]);
 
     useEffect(() => {
-        // This is where you transplant the fetch() logic from your old Dashboard
-        // For now, we are simulating the live data load to ensure UI stability
         const fetchLiveStats = async () => {
             try {
-                // Uncomment and update when the backend endpoints are finalized
-                // const response = await fetch('http://localhost:5000/api/stats');
-                // const data = await response.json();
+                const response = await fetch('http://localhost:5000/api/stats');
                 
-                // Simulated live metrics delay
-                setTimeout(() => {
-                    setImpactStats({
-                        mealsRescued: 12450,
-                        activeVolunteers: 42,
-                        pendingRequests: 18
-                    });
-                }, 800);
+                if (!response.ok) {
+                    throw new Error("Failed to connect to stats endpoint");
+                }
+                
+                const data = await response.json();
+                
+                // Update the state with the live data from your database!
+                setImpactStats({
+                    mealsRescued: data.mealsRescued || 0,
+                    activeVolunteers: data.activeVolunteers || 0,
+                    pendingRequests: data.pendingRequests || 0
+                });
+                
             } catch (error) {
                 console.error("Failed to fetch impact stats:", error);
+                // Optional: Leave a safe fallback so the UI doesn't look broken if the server is off
+                setImpactStats({ mealsRescued: 0, activeVolunteers: 0, pendingRequests: 0 });
             }
         };
 

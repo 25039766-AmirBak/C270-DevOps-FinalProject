@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute'; // 1. Import our new Gatekeeper
+import './styles/auth.css';
     
 // Pages
 import Home from './pages/Home';        
@@ -33,24 +34,28 @@ function App() {
           <Route path="register" element={<Register />} />
           
           {/* --- PROTECTED ROUTES --- */}
+          {/* Any logged-in user can access the dashboard (NO verification needed here) */}
+          <Route element={<ProtectedRoute allowedRoles={['Donor', 'Recipient', 'Volunteer', 'Admin']} />}>
+            <Route path="dashboard" element={<Dashboard />} />
+          </Route>
           
-          {/* Only 'donator' can access anything inside this block */}
-          <Route element={<ProtectedRoute allowedRoles={['donator']} />}>
+          {/* Only 'Donor' can access, MUST BE VERIFIED */}
+          <Route element={<ProtectedRoute allowedRoles={['Donor']} requiresVerification={true} />}>
             <Route path="donate" element={<PostDonation />} />
           </Route>
           
-          {/* Only 'requester' can access anything inside this block */}
-          <Route element={<ProtectedRoute allowedRoles={['requester']} />}>
+          {/* Only 'Recipient' can access, MUST BE VERIFIED */}
+          <Route element={<ProtectedRoute allowedRoles={['Recipient']} requiresVerification={true} />}>
             <Route path="request" element={<RequestPage />} />
           </Route>
 
-          {/* You can do the same for volunteers later! */}
-          {/* <Route element={<ProtectedRoute allowedRoles={['volunteer']} />}> */}
-          {/* <Route path="volunteer" element={<Volunteer />} /> */}
-          {/* </Route> */}
+          {/* Only 'Volunteer' can access, MUST BE VERIFIED */}
+          {/*<Route element={<ProtectedRoute allowedRoles={['Volunteer']} requiresVerification={true} />}> */}
+          {/*  <Route path="volunteer" element={<Volunteer />} /> */}
+          {/*</Route> */}
 
-          {/* Only 'admin' can access anything inside this block */}
-          <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+          {/* Only 'Admin' can access (NO verification needed here) */}
+          <Route element={<ProtectedRoute allowedRoles={['Admin']} />}>
            <Route path="admin" element={<Admin />} />
            <Route path="admin/users" element={<AdminUsers />} />
            <Route path="admin/verification" element={<AdminVerification />} />

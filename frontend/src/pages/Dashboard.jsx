@@ -52,15 +52,16 @@ function Dashboard() {
     );
   }
 
+  // Check if any of the user's roles intersect with the required roles
   const needsDocuments =
-    ['Recipient', 'Volunteer'].includes(user.role) && user.verificationStatus === 'Not Submitted';
+    user.role.some(r => ['Recipient', 'Volunteer'].includes(r)) && user.verificationStatus === 'Not Submitted';
 
   return (
     <div className="page-card">
       <h2>Dashboard</h2>
       <p><strong>{user.name}</strong></p>
       <p>Email: {user.email}</p>
-      <p>Role: {user.role}</p>
+      <p>Role: {user.role.join(', ')}</p>
       <p>
         Verification:{' '}
         <span

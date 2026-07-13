@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import authService from '../services/authService';
 
 function Login() {
@@ -7,6 +8,7 @@ function Login() {
   const [message, setMessage] = useState('');
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+  const { setUser } = useAuth();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -32,14 +34,16 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!validate()) {
-      return;
-    }
+    if (!validate()) return;
 
     try {
       const res = await authService.login(formData.email, formData.password);
       localStorage.setItem('token', res.data.token);
+      
+      // Tell the global app context that the user is logged in!
+      // (Ensure res.data.user.role is an array)
+      setUser(res.data.user); 
+      
       setMessage('Login successful');
       navigate('/dashboard');
     } catch (error) {

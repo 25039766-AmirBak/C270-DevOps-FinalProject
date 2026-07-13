@@ -4,6 +4,8 @@ import authService from '../services/authService';
 function AdminUsers() {
   const [users, setUsers] = useState([]);
   const [message, setMessage] = useState('');
+  const [editingUserId, setEditingUserId] = useState(null);
+  const [editRoles, setEditRoles] = useState([]);
   const token = localStorage.getItem('token');
 
   useEffect(() => {
@@ -14,16 +16,38 @@ function AdminUsers() {
       .catch((err) => setMessage(err.response?.data?.message || 'Failed to load users'));
   }, [token]);
 
-  const handlePromote = async (userId, name) => {
-    if (!window.confirm(`Promote ${name} to Admin?`)) return;
+  // --- NEW: Start editing a user's roles ---
+  const startEditing = (user) => {
+    setEditingUserId(user._id);
+    // Safely handle old string formats just in case
+    const rawRole = user.role || [];
+    setEditRoles(Array.isArray(rawRole) ? rawRole : [rawRole]);
+  };
+
+  // --- NEW: Toggle a checkbox in the edit menu ---
+  const toggleEditRole = (roleStr) => {
+    if (editRoles.includes(roleStr)) {
+      setEditRoles(editRoles.filter(r => r !== roleStr)); // Remove
+    } else {
+      setEditRoles([...editRoles, roleStr]); // Add
+    }
+  };
+
+  // --- NEW: Save the updated array to the database ---
+  const saveRoles = async (userId) => {
+    if (editRoles.length === 0) {
+      setMessage('User must have at least one role.');
+      return;
+    }
     try {
-      const res = await authService.promoteUser(userId, token);
+      const res = await authService.updateUserRoles(userId, editRoles, token);
       setUsers((prev) =>
-        prev.map((u) => (u._id === userId ? { ...u, role: 'Admin' } : u))
+        prev.map((u) => (u._id === userId ? { ...u, role: res.data.role } : u))
       );
       setMessage(res.data.message);
+      setEditingUserId(null); // Close edit mode
     } catch (err) {
-      setMessage(err.response?.data?.message || 'Promotion failed');
+      setMessage(err.response?.data?.message || 'Failed to update roles');
     }
   };
 
@@ -52,6 +76,7 @@ function AdminUsers() {
       <h2>Manage Users</h2>
       {message && <p className="message">{message}</p>}
       {users.length === 0 && !message && <p>No users found.</p>}
+      
       <table className="admin-table">
         <thead>
           <tr>
@@ -63,29 +88,53 @@ function AdminUsers() {
           </tr>
         </thead>
         <tbody>
-          {users.map((u) => (
-            <tr key={u._id}>
-              <td>{u.name}</td>
-              <td>{u.email}</td>
-              <td>{u.role}</td>
-              <td>{u.verificationStatus}</td>
-              <td className="actions-cell">
-                <button
-                  className="approve-btn"
-                  disabled={u.role === 'Admin'}
-                  onClick={() => handlePromote(u._id, u.name)}
-                >
-                  Promote
-                </button>
-                <button
-                  className="reject-btn"
-                  onClick={() => handleDelete(u._id, u.name)}
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
+          {users.map((u) => {
+            // Safely format roles for display
+            const rawRole = u.role || [];
+            const displayRoles = Array.isArray(rawRole) ? rawRole : [rawRole];
+
+            return (
+              <tr key={u._id}>
+                <td>{u.name}</td>
+                <td>{u.email}</td>
+                <td>{displayRoles.join(', ')}</td> 
+                <td>{u.verificationStatus}</td>
+                <td className="actions-cell">
+                  
+                  {/* CONDITIONAL UI: Show checkboxes if editing, else show buttons */}
+                  {editingUserId === u._id ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                        {['Donor', 'Recipient', 'Volunteer', 'Admin'].map(r => (
+                          <label key={r} style={{ fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer' }}>
+                            <input 
+                              type="checkbox" 
+                              checked={editRoles.includes(r)} 
+                              onChange={() => toggleEditRole(r)} 
+                            /> {r}
+                          </label>
+                        ))}
+                      </div>
+                      <div>
+                        <button className="approve-btn" onClick={() => saveRoles(u._id)}>Save</button>
+                        <button className="reject-btn" style={{ marginLeft: '10px' }} onClick={() => setEditingUserId(null)}>Cancel</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <button className="approve-btn" onClick={() => startEditing(u)}>
+                        Edit Roles
+                      </button>
+                      <button className="reject-btn" onClick={() => handleDelete(u._id, u.name)}>
+                        Delete
+                      </button>
+                    </>
+                  )}
+                  
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

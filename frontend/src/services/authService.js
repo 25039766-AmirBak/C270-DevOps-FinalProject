@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const API = axios.create({ baseURL: '/api/auth' });
-const VERIFICATION_API = axios.create({ baseURL: '/api/verification' });
+const API = axios.create({ baseURL: 'http://localhost:5000/api/auth' });
+const VERIFICATION_API = axios.create({ baseURL: 'http://localhost:5000/api/verification' });
 
 const authService = {
   login: (email, password) => API.post('/login', { email, password }),
@@ -18,8 +18,8 @@ const authService = {
   deleteUser: (userId, token) =>
     API.delete(`/users/${userId}`, { headers: { Authorization: `Bearer ${token}` } }),
 
-  promoteUser: (userId, token) =>
-    API.put(`/promote/${userId}`, {}, { headers: { Authorization: `Bearer ${token}` } }),
+  updateUserRoles: (userId, roles, token) =>
+    API.patch(`/users/${userId}/roles`, { roles }, { headers: { Authorization: `Bearer ${token}` } }),
 
   uploadDocument: (file, token) => {
     const fd = new FormData();

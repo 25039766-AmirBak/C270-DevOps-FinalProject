@@ -54,7 +54,8 @@ function AdminVerification() {
               {item.document && (
                 <a
                   className="download-link"
-                  href={`/uploads/${encodeURIComponent(item.document)}`}
+                  // Point explicitly to your backend server port 5000
+                  href={`http://localhost:5000/uploads/${encodeURIComponent(item.document)}`}
                   target="_blank"
                   rel="noreferrer"
                 >

@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import '../global.css';
 
 const AiChatbotWidget = () => {
     const [isOpen, setIsOpen] = useState(false);
