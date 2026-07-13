@@ -5,7 +5,7 @@ const auth = require('../middleware/authMiddleware');
 const { admin } = auth;
 const upload = require('../middleware/upload');
 const { uploadDocument } = require('../controllers/uploadController');
-const User = require('../models/User');
+const User = require('../models/Users');
 
 router.post('/upload', auth, upload.single('document'), uploadDocument);
 
