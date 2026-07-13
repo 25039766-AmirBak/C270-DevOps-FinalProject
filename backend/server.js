@@ -26,11 +26,8 @@ if (!fs.existsSync(uploadsDir)) {
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(uploadsDir));
-<<<<<<< HEAD
 
 // API Endpoints
-=======
->>>>>>> 9646eaf7eb3c9d34372afb0b01c1807be8ea8905
 app.use("/api/donations", donationRoutes);
 app.use("/api/requests", requestRoutes);
 

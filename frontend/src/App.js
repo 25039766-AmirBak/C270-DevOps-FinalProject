@@ -1,44 +1,47 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
-import ProtectedRoute from './components/ProtectedRoute'; // 1. Import our new Gatekeeper
+import ProtectedRoute from './components/ProtectedRoute';
     
-// Pages
+// Placeholder imports for the team's pages
 import Home from './pages/Home';        
 import About from './pages/About';
-import PostDonation from './pages/PostDonation'; 
-import RequestPage from './pages/RequestPage'; 
-// import MapView from './pages/Map';          
-// import Volunteer from './pages/Volunteer';  
-// import Login from './pages/Login';          
+import PostDonation from './pages/PostDonation';       
+// import Request from './pages/Request';     
+// import MapView from './pages/Map';         
+// import Volunteer from './pages/Volunteer'; 
+
+// Auth pages
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import Admin from './pages/Admin';
+import AdminUsers from './pages/AdminUsers';
+import AdminVerification from './pages/AdminVerification';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* The Master Layout wraps all child routes */}
         <Route path="/" element={<Layout />}>
           
-          {/* Public Routes - Anyone can see these */}
+          {/* 'index' means this loads at the root path "/" */}
           <Route index element={<Home />} /> 
           <Route path="about" element={<About />} />
+          
+          {/* Feature Routes (Commented out until teammates build them) */}
+          <Route path="donate" element={<PostDonation />} />
+          {/* <Route path="request" element={<Request />} /> */}
           {/* <Route path="map" element={<MapView />} /> */}
-          {/* <Route path="login" element={<Login />} /> */}
-          
-          {/* --- PROTECTED ROUTES --- */}
-          
-          {/* Only 'donator' can access anything inside this block */}
-          <Route element={<ProtectedRoute allowedRoles={['donator']} />}>
-            <Route path="donate" element={<PostDonation />} />
-          </Route>
-          
-          {/* Only 'requester' can access anything inside this block */}
-          <Route element={<ProtectedRoute allowedRoles={['requester']} />}>
-            <Route path="request" element={<RequestPage />} />
-          </Route>
-
-          {/* You can do the same for volunteers later! */}
-          {/* <Route element={<ProtectedRoute allowedRoles={['volunteer']} />}> */}
           {/* <Route path="volunteer" element={<Volunteer />} /> */}
-          {/* </Route> */}
+
+          {/* Auth Routes */}
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
+          <Route path="dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+          <Route path="admin/users" element={<ProtectedRoute><AdminUsers /></ProtectedRoute>} />
+          <Route path="admin/verification" element={<ProtectedRoute><AdminVerification /></ProtectedRoute>} />
           
         </Route>
       </Routes>

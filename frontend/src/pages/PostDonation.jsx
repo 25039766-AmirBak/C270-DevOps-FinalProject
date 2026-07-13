@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Link } from 'react-router-dom';
 
 function PostDonation() {
   const [formData, setFormData] = useState({
@@ -216,9 +215,9 @@ function PostDonation() {
                 {isLoading ? "Posting..." : "Post Donation"}
               </button>
 
-            <Link className="btn btn-secondary" to="/request">
-              View Available Donations
-            </Link>
+              <a className="btn btn-secondary" href="/donations">
+                View Available Donations
+              </a>
             </div>
           </form>
 
