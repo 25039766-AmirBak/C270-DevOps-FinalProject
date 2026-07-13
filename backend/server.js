@@ -9,16 +9,19 @@ if (!globalThis.crypto) {
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const requestRoutes = require("./routes/requestRoutes");
 require("dotenv").config();
 
+// Routes
 const donationRoutes = require("./routes/donationRoutes");
+const requestRoutes = require("./routes/requestRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+
+// API Endpoints
 app.use("/api/donations", donationRoutes);
 app.use("/api/requests", requestRoutes);
 
@@ -26,13 +29,11 @@ app.get("/", (req, res) => {
   res.send("Food Donation API is running");
 });
 
-app.use("/api/donations", donationRoutes);
-
+// Database Connection
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
     console.log("MongoDB Connected");
-
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
@@ -41,6 +42,7 @@ mongoose
     console.error("MongoDB connection error:", error.message);
   });
 
+// --- AI INTEGRATION ---
 const { GoogleGenAI } = require('@google/genai');
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
