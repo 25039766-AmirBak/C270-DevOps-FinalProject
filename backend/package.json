@@ -5,9 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js",
-    "seed": "node seed.js",
-    "test": "node --check server.js && node --check routes/donationRoutes.js && node --check models/Donation.js"
+    "test": "node --check server.js && node --check routes/donationRoutes.js && node --check routes/requestRoutes.js && node --check models/Donation.js && node --check models/Request.js"
   },
   "repository": {
     "type": "git",

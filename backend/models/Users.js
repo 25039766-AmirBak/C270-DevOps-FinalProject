@@ -22,10 +22,11 @@ const userSchema = new mongoose.Schema(
       select: false,
     },
     role: {
-      type: String,
-      enum: ['Donor', 'Recipient', 'Volunteer', 'Admin'],
-      default: 'Recipient',
+      type: [String],
+      enum: ["Donor", "Recipient", "Volunteer", "Admin"],
+      default: ["Recipient"] // Default is now an array containing one string
     },
+
     verificationStatus: {
       type: String,
       enum: ['Not Submitted', 'Pending', 'Verified', 'Rejected'],

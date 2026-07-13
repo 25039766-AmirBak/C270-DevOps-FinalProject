@@ -13,6 +13,7 @@ const connectDB = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
 const verificationRoutes = require('./routes/verificationRoutes');
 const donationRoutes = require("./routes/donationRoutes");
+const requestRoutes = require("./routes/requestRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -26,6 +27,10 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(uploadsDir));
 
+// API Endpoints
+app.use("/api/donations", donationRoutes);
+app.use("/api/requests", requestRoutes);
+
 app.get("/", (req, res) => {
   res.send("Food Donation API is running");
 });
@@ -34,6 +39,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/verification", verificationRoutes);
 app.use("/api/donations", donationRoutes);
 
+// --- AI INTEGRATION ---
 const { GoogleGenAI } = require('@google/genai');
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
