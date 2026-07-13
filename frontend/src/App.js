@@ -8,8 +8,16 @@ import About from './pages/About';
 import PostDonation from './pages/PostDonation'; 
 import RequestPage from './pages/RequestPage'; 
 // import MapView from './pages/Map';          
-// import Volunteer from './pages/Volunteer';  
-// import Login from './pages/Login';          
+// import Volunteer from './pages/Volunteer'; 
+
+// Auth pages
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import Admin from './pages/Admin';
+import AdminUsers from './pages/AdminUsers';
+import AdminVerification from './pages/AdminVerification';
+         
 
 function App() {
   return (
@@ -21,7 +29,8 @@ function App() {
           <Route index element={<Home />} /> 
           <Route path="about" element={<About />} />
           {/* <Route path="map" element={<MapView />} /> */}
-          {/* <Route path="login" element={<Login />} /> */}
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
           
           {/* --- PROTECTED ROUTES --- */}
           
@@ -39,6 +48,13 @@ function App() {
           {/* <Route element={<ProtectedRoute allowedRoles={['volunteer']} />}> */}
           {/* <Route path="volunteer" element={<Volunteer />} /> */}
           {/* </Route> */}
+
+          {/* Only 'admin' can access anything inside this block */}
+          <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+           <Route path="admin" element={<Admin />} />
+           <Route path="admin/users" element={<AdminUsers />} />
+           <Route path="admin/verification" element={<AdminVerification />} />
+          </Route>
           
         </Route>
       </Routes>
