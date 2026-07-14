@@ -1,16 +1,37 @@
-# React + Vite
+# SharePlate - Food Surplus Redistribution Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+SharePlate is a full-stack web application engineered by LaunchLab Team 1. Our mission is to bridge the gap between food surplus and scarcity in Singapore by connecting food donors directly with beneficiaries and volunteer drivers.
 
-Currently, two official plugins are available:
+## 🚀 Features
+* **Interactive Map:** Real-time visibility of active food donations across Singapore.
+* **Smart Roles:** Tailored UI experiences for Donors, Beneficiaries, and Volunteers.
+* **AI Assistant:** Integrated Google Gemini LLM to help users navigate food safety guidelines and platform features.
+* **Live Impact Metrics:** Real-time tracking of meals rescued and active community volunteers.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🛠️ Tech Stack
+* **Frontend:** React.js, React Router v6
+* **Backend:** Node.js, Express.js (REST API)
+* **AI Integration:** `@google/genai` (Gemini 2.5 Flash)
+* **Styling:** Custom CSS Variables & Grid Layouts
 
-## React Compiler
+## ⚙️ How to Run Locally
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 1. Start the Backend Server
+Navigate to the backend directory, configure your environment variables, and start the server:
+\`\`\`bash
+cd backend
+npm install
+npm run dev
+\`\`\`
+*(Note: You must have a valid `.env` file with `GEMINI_API_KEY` to use the Chatbot)*
 
-## Expanding the ESLint configuration
+### 2. Start the Frontend Application
+Navigate to the frontend directory and start the React server:
+\`\`\`bash
+cd frontend
+npm install
+npm start
+\`\`\`
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
