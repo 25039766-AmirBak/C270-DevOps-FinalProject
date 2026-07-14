@@ -1,9 +1,8 @@
 import 'leaflet/dist/leaflet.css';
 import React, { useState, useEffect, useRef } from "react";
 import L from "leaflet";
-import '../styles/map.css';
 
-// Fix default marker icon paths for React/Vite
+// Fix default marker icon paths
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
@@ -11,75 +10,100 @@ L.Icon.Default.mergeOptions({
   shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
 });
 
-export default function DonationMap() {
-  const [donations, setDonations] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchError, setSearchError] = useState("");
-  
-  const mapContainerRef = useRef(null);
-  const mapInstanceRef = useRef(null);
+// 📍 BULLETPROOF DICTIONARY: Bypasses API limits for known locations
+const knownLocations = {
+  "woodlands": { lat: 1.4368, lng: 103.7865 },
+  "woodland": { lat: 1.4368, lng: 103.7865 }, 
+  "admiralty": { lat: 1.4406, lng: 103.8008 },
+  "republic polytechnic": { lat: 1.4428, lng: 103.7848 },
+  "rp canteen": { lat: 1.4428, lng: 103.7848 },
+  "ang mo kio": { lat: 1.3691, lng: 103.8454 },
+  "orchard": { lat: 1.3048, lng: 103.8318 },
+  "orchad": { lat: 1.3048, lng: 103.8318 } 
+};
 
-  // 1. Fetch real data from the backend
+export default function DonationMap() {
+  const [donations, setDonations] = useState([]); 
+  const [searchQuery, setSearchQuery] = useState(""); 
+  const [searchError, setSearchError] = useState(""); 
+  const [activeFilter, setActiveFilter] = useState("all"); 
+  
+  const mapContainerRef = useRef(null); 
+  const mapInstanceRef = useRef(null); 
+  const isGeocodingRef = useRef(false); 
+
+  // 1. Fetch real data
   useEffect(() => {
     fetch('http://localhost:5000/api/donations') 
-      .then((res) => {
-        if (!res.ok) throw new Error("Network response was not ok");
-        return res.json();
-      })
-      .then((data) => setDonations(data))
-      .catch((error) => console.error("Error fetching donation data:", error));
+      .then(res => res.json())
+      .then(data => setDonations(data))
+      .catch(err => console.error("Error fetching data:", err));
   }, []);
 
-  // 2. Initialize map and handle dynamic geocoding
+  // 🔥 CHANGE 1: We moved the filter math up here so the Map can use it!
+  const uniqueLocations = new Set(donations.map(d => (d.location || "").toLowerCase().trim())).size;
+  
+  const expiredItems = donations.filter(d => {
+    if (!d.expiryDate) return false;
+    return new Date(d.expiryDate) < new Date(); 
+  });
+
+  const activeItems = donations.filter(d => {
+    if (!d.expiryDate) return true; // Keep items with no date
+    return new Date(d.expiryDate) >= new Date(); // Keep safe items
+  });
+
+  // Figure out which list to show based on the active button
+  let displayedDonations = donations;
+  if (activeFilter === "expired") displayedDonations = expiredItems;
+  if (activeFilter === "active") displayedDonations = activeItems;
+
+
+  // 2. Initialize map & plot pins
+  // 🔥 CHANGE 2: This hook now relies on [displayedDonations] instead of [donations]
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
     if (!mapInstanceRef.current) {
       mapInstanceRef.current = L.map(mapContainerRef.current).setView([1.3521, 103.8198], 11);
-
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution: '&copy; OpenStreetMap contributors'
       }).addTo(mapInstanceRef.current);
     }
 
-    // Clear existing markers before drawing new ones to prevent duplication
     mapInstanceRef.current.eachLayer((layer) => {
-      if (layer instanceof L.Marker) {
-        mapInstanceRef.current.removeLayer(layer);
-      }
+      if (layer instanceof L.Marker) mapInstanceRef.current.removeLayer(layer);
     });
 
-    // Helper function to geocode a single text location dynamically
     const plotDynamicMarker = async (item) => {
-      let lat = item.lat || item.latitude;
-      let lng = item.lng || item.longitude || item.lon;
+      let lat = item.lat || item.latitude; 
+      let lng = item.lng || item.longitude || item.lon; 
+      let usedApi = false; 
 
       if (!lat || !lng) {
-        if (!item.location) return;
+        const locString = (item.location || "").toLowerCase().trim();
         
-        try {
-          // Ask Nominatim to find the text location in Singapore
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-              item.location + ", Singapore"
-            )}`
-          );
-          const data = await response.json();
-          
-          if (data && data.length > 0) {
-            lat = parseFloat(data[0].lat);
-            lng = parseFloat(data[0].lon);
+        if (knownLocations[locString]) {
+          lat = knownLocations[locString].lat;
+          lng = knownLocations[locString].lng;
+        } else if (locString) {
+          try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locString + ", Singapore")}`);
+            const data = await res.json();
+            if (data && data.length > 0) {
+              lat = parseFloat(data[0].lat);
+              lng = parseFloat(data[0].lon);
+              usedApi = true; 
+            }
+          } catch (err) {
+            console.warn("API blocked this request, skipping:", locString);
           }
-        } catch (err) {
-          console.error(`Geocoding failed for: ${item.location}`, err);
-          return;
         }
       }
 
-      // If we have coordinates, drop the pin with a tiny random offset (Jitter)
       if (lat && lng) {
-        const latOffset = (Math.random() - 0.5) * 0.0005; 
-        const lngOffset = (Math.random() - 0.5) * 0.0005;
+        const latOffset = (Math.random() - 0.5) * 0.003; 
+        const lngOffset = (Math.random() - 0.5) * 0.003;
 
         L.marker([lat + latOffset, lng + lngOffset])
           .addTo(mapInstanceRef.current)
@@ -94,34 +118,28 @@ export default function DonationMap() {
             </div>
           `);
       }
+      return usedApi; 
     };
 
-    // 3. Traffic Light Method: Run sequentially to prevent 429 Too Many Requests
-    const loadMarkersSlowly = async () => {
-      for (let i = 0; i < donations.length; i++) {
-        const item = donations[i];
-        
-        let lat = item.lat || item.latitude;
-        let lng = item.lng || item.longitude || item.lon;
-        
-        await plotDynamicMarker(item);
-
-        // Pause for 1.2 seconds if we had to ping the API
-        if (!lat || !lng) {
-          await new Promise(resolve => setTimeout(resolve, 1200)); 
+    const loadMarkers = async () => {
+      // 🔥 CHANGE 3: The map now loops through displayedDonations!
+      if (isGeocodingRef.current || displayedDonations.length === 0) return;
+      isGeocodingRef.current = true; 
+      
+      for (let i = 0; i < displayedDonations.length; i++) {
+        const usedApi = await plotDynamicMarker(displayedDonations[i]);
+        if (usedApi) {
+          await new Promise(resolve => setTimeout(resolve, 1500)); 
         }
       }
+      isGeocodingRef.current = false; 
     };
 
-    // Kick off the throttled loading process
-    loadMarkersSlowly();
+    loadMarkers(); 
+  }, [displayedDonations]); 
 
-    return () => {
-      // Map cleanup on unmount
-    };
-  }, [donations]);
 
-  // 4. Handle Search Repositioning
+  // --- SEARCH HANDLER ---
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!searchQuery.trim() || !mapInstanceRef.current) return;
@@ -133,29 +151,176 @@ export default function DonationMap() {
       if (data && data.length > 0) {
         mapInstanceRef.current.setView([parseFloat(data[0].lat), parseFloat(data[0].lon)], 14);
       } else {
-        setSearchError("Location not found. Try another location!");
+        setSearchError("Location not found.");
       }
     } catch (err) {
-      setSearchError("Search failed. Try again.");
+      setSearchError("Search failed.");
     }
   };
 
+  // --- CLICK-TO-PAN HELPER ---
+  const focusOnLocation = (locName) => {
+    const locString = (locName || "").toLowerCase().trim();
+    if (knownLocations[locString] && mapInstanceRef.current) {
+      mapInstanceRef.current.setView([knownLocations[locString].lat, knownLocations[locString].lng], 14);
+    }
+  };
+
+
+  // --- HTML LAYOUT (JSX) ---
   return (
-    <div style={{ background: "white", padding: "20px", borderRadius: "8px" }}>
-      <form onSubmit={handleSearch} style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
-        <input
-          type="text"
-          placeholder="Search neighborhood or postal code..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={{ flex: 1, padding: "10px", borderRadius: "4px", border: "1px solid #ccc" }}
-        />
-        <button type="submit" style={{ padding: "10px 20px", background: "#2E7D32", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}>
-          Search
-        </button>
-      </form>
-      {searchError && <p style={{ color: "red", fontSize: "0.9rem" }}>{searchError}</p>}
-      <div ref={mapContainerRef} style={{ height: "500px", width: "100%", borderRadius: "8px", border: "1px solid #E5E7EB" }} />
+    <div style={{ 
+      maxWidth: "1200px", 
+      margin: "0 auto", 
+      padding: "32px 24px", 
+      fontFamily: "system-ui, -apple-system, sans-serif",
+      backgroundColor: "#F3F4F6", 
+      minHeight: "100vh"
+    }}>
+      
+      <div style={{ marginBottom: "24px" }}>
+        <h1 style={{ color: "#1F2937", margin: "0 0 6px 0", fontSize: "28px", fontWeight: "800", letterSpacing: "-0.5px" }}>
+          Operations Dashboard
+        </h1>
+        <p style={{ color: "#6B7280", margin: 0, fontSize: "14px" }}>Live overview of community food rescue operations.</p>
+      </div>
+        
+      <div style={{ 
+        display: "grid", 
+        gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", 
+        gap: "20px", 
+        marginBottom: "24px" 
+      }}>
+        <div style={{ background: "white", padding: "20px", borderRadius: "12px", border: "1px solid #E5E7EB", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}>
+          <div style={{ fontSize: "13px", color: "#6B7280", fontWeight: "600", textTransform: "uppercase" }}>Total Food Items</div>
+          <div style={{ fontSize: "32px", fontWeight: "800", color: "#2E7D32", marginTop: "8px" }}>{donations.length}</div>
+        </div>
+        
+        <div style={{ background: "white", padding: "20px", borderRadius: "12px", border: "1px solid #E5E7EB", boxShadow: "0 1px 2px rgba(0,0,0,0.05)" }}>
+          <div style={{ fontSize: "13px", color: "#6B7280", fontWeight: "600", textTransform: "uppercase" }}>Active Distribution Hubs</div>
+          <div style={{ fontSize: "32px", fontWeight: "800", color: "#2563EB", marginTop: "8px" }}>{uniqueLocations}</div>
+        </div>
+
+        <div style={{ background: "white", padding: "20px", borderRadius: "12px", border: "1px solid #E5E7EB", boxShadow: "0 1px 2px rgba(0,0,0,0.05)", borderLeft: "4px solid #DC2626" }}>
+          <div style={{ fontSize: "13px", color: "#DC2626", fontWeight: "700", textTransform: "uppercase" }}>Expired Items</div>
+          <div style={{ fontSize: "32px", fontWeight: "800", color: "#991B1B", marginTop: "8px" }}>{expiredItems.length}</div>
+        </div>
+      </div>
+
+      <div style={{ 
+        display: "grid", 
+        gridTemplateColumns: "350px 1fr", 
+        gap: "24px",
+        alignItems: "start"
+      }}>
+        
+        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+          
+          <div style={{ background: "white", padding: "16px", borderRadius: "12px", boxShadow: "0 1px 3px rgba(0,0,0,0.05)", border: "1px solid #E5E7EB" }}>
+            <form onSubmit={handleSearch} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+              <label style={{ fontSize: "12px", fontWeight: "600", color: "#4B5563" }}>LOCATE NEIGHBORHOOD</label>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <input
+                  type="text"
+                  placeholder="e.g. Woodlands..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{ flex: 1, padding: "10px 12px", borderRadius: "6px", border: "1px solid #D1D5DB", fontSize: "14px", outline: "none" }}
+                />
+                <button type="submit" style={{ padding: "10px 16px", background: "#1F2937", color: "white", border: "none", borderRadius: "6px", fontWeight: "600", fontSize: "14px", cursor: "pointer" }}>
+                  Find
+                </button>
+              </div>
+            </form>
+            {searchError && <p style={{ color: "#DC2626", fontSize: "12px", margin: "8px 0 0 0" }}>{searchError}</p>}
+          </div>
+
+          <div style={{ 
+            background: "white", 
+            borderRadius: "12px", 
+            border: "1px solid #E5E7EB",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
+            padding: "16px",
+            display: "flex",
+            flexDirection: "column",
+            maxHeight: "440px"
+          }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <h3 style={{ margin: 0, fontSize: "14px", color: "#374151", fontWeight: "700" }}>INVENTORY</h3>
+              
+              <div style={{ display: "flex", gap: "4px", background: "#F3F4F6", padding: "4px", borderRadius: "6px" }}>
+                <button 
+                  onClick={() => setActiveFilter("all")}
+                  style={{ padding: "4px 8px", fontSize: "11px", fontWeight: "600", border: "none", borderRadius: "4px", cursor: "pointer", background: activeFilter === "all" ? "white" : "transparent", color: activeFilter === "all" ? "#1F2937" : "#6B7280", boxShadow: activeFilter === "all" ? "0 1px 2px rgba(0,0,0,0.1)" : "none" }}
+                >
+                  All
+                </button>
+                {/* 🔥 CHANGE 4: The new "Active" button is now in the UI */}
+                <button 
+                  onClick={() => setActiveFilter("active")}
+                  style={{ padding: "4px 8px", fontSize: "11px", fontWeight: "600", border: "none", borderRadius: "4px", cursor: "pointer", background: activeFilter === "active" ? "#ECFDF5" : "transparent", color: activeFilter === "active" ? "#059669" : "#6B7280", boxShadow: activeFilter === "active" ? "0 1px 2px rgba(0,0,0,0.1)" : "none" }}
+                >
+                  Active
+                </button>
+                <button 
+                  onClick={() => setActiveFilter("expired")}
+                  style={{ padding: "4px 8px", fontSize: "11px", fontWeight: "600", border: "none", borderRadius: "4px", cursor: "pointer", background: activeFilter === "expired" ? "#FEF2F2" : "transparent", color: activeFilter === "expired" ? "#DC2626" : "#6B7280", boxShadow: activeFilter === "expired" ? "0 1px 2px rgba(0,0,0,0.1)" : "none" }}
+                >
+                  Expired
+                </button>
+              </div>
+            </div>
+            
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", overflowY: "auto", paddingRight: "4px" }}>
+              {displayedDonations.length === 0 ? (
+                <div style={{ fontSize: "13px", color: "#9CA3AF", textAlign: "center", padding: "20px 0" }}>No items match this filter.</div>
+              ) : (
+                displayedDonations.map((item, idx) => (
+                  <div 
+                    key={idx} 
+                    onClick={() => focusOnLocation(item.location)}
+                    style={{ 
+                      padding: "12px", 
+                      borderRadius: "8px", 
+                      border: "1px solid #F3F4F6", 
+                      background: "#F9FAFB",
+                      cursor: "pointer",
+                      transition: "all 0.2s"
+                    }}
+                  >
+                    <div style={{ fontWeight: "600", fontSize: "14px", color: "#1F2937", marginBottom: "4px" }}>
+                      {item.foodName || "Food Item"}
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "#6B7280" }}>
+                      <span>Qty: {item.quantity || "N/A"}</span>
+                      <span>📍 {item.location || "Singapore"}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div style={{ 
+          background: "white",
+          padding: "12px",
+          borderRadius: "16px",
+          border: "1px solid #E5E7EB",
+          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)"
+        }}>
+          <div 
+            ref={mapContainerRef} 
+            style={{ 
+              height: "600px", 
+              width: "100%", 
+              borderRadius: "12px",
+              border: "1px solid #E5E7EB"
+            }} 
+          />
+        </div>
+
+      </div>
     </div>
   );
 }
