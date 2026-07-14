@@ -1,0 +1,28 @@
+.donation-page { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+.donation-header { text-align: center; margin-bottom: 40px; }
+.donation-header h1 { font-size: 2.5rem; color: var(--primary-color); margin-bottom: 10px; }
+.donation-header p { font-size: 1.1rem; color: #6B7280; max-width: 720px; margin: 0 auto; line-height: 1.6; }
+.donation-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 30px; align-items: start; }
+.donation-card { background-color: white; padding: 32px; border-radius: 12px; border-top: 4px solid var(--primary-color); box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); }
+.donation-card h2 { margin: 0 0 10px 0; color: var(--text-dark); font-size: 1.6rem; }
+.card-subtitle { color: #6B7280; margin-bottom: 25px; line-height: 1.5; }
+
+.post-donation-form { display: flex; flex-direction: column; gap: 18px; }
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+.form-group label { font-weight: 700; color: var(--text-dark); }
+.form-group input { padding: 12px 14px; border: 1px solid #D1D5DB; border-radius: 6px; font-size: 1rem; outline: none; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
+.form-group input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.12); }
+.input-error { border-color: #DC2626 !important; background-color: #FEF2F2; }
+
+.donation-list { display: flex; flex-direction: column; gap: 14px; }
+.donation-item { display: flex; justify-content: space-between; gap: 18px; padding: 18px; border-radius: 10px; background-color: var(--background-light); border: 1px solid #E5E7EB; }
+.donation-item h3 { margin: 0 0 8px 0; color: var(--text-dark); }
+.donation-item p { margin: 4px 0; color: #6B7280; font-size: 0.95rem; }
+.status-badge { height: fit-content; padding: 6px 12px; border-radius: 999px; background-color: #DCFCE7; color: var(--primary-color); font-size: 0.85rem; font-weight: 800; white-space: nowrap; }
+.empty-text { padding: 20px; text-align: center; color: #6B7280; background-color: var(--background-light); border-radius: 8px; }
+.form-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+
+@media (max-width: 850px) {
+  .donation-grid { grid-template-columns: 1fr; }
+  .donation-header h1 { font-size: 2rem; }
+}
