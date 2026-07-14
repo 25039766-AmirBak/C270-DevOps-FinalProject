@@ -1,4 +1,5 @@
 import 'leaflet/dist/leaflet.css';
+import '../styles/map.css';
 import React, { useState, useEffect, useRef } from "react";
 import L from "leaflet";
 
@@ -315,7 +316,8 @@ export default function DonationMap() {
               height: "600px", 
               width: "100%", 
               borderRadius: "12px",
-              border: "1px solid #E5E7EB"
+              border: "1px solid #E5E7EB",
+              zIndex: 0
             }} 
           />
         </div>
