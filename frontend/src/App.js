@@ -2,13 +2,13 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute'; // 1. Import our new Gatekeeper
 import './styles/auth.css';
-import DonationMap from './pages/DonationMap'; // (Adjust the path if your file is in a different folder!)
+
 // Pages
 import Home from './pages/Home';        
 import About from './pages/About';
 import PostDonation from './pages/PostDonation'; 
 import RequestPage from './pages/RequestPage'; 
-// import MapView from './pages/Map';          
+import DonationMap from './pages/DonationMap';       
 // import Volunteer from './pages/Volunteer'; 
 
 // Auth pages

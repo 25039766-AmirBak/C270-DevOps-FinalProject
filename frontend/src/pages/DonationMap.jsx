@@ -1,6 +1,7 @@
 import 'leaflet/dist/leaflet.css';
 import React, { useState, useEffect, useRef } from "react";
 import L from "leaflet";
+import '../styles/map.css';
 
 // Fix default marker icon paths for React/Vite
 delete L.Icon.Default.prototype._getIconUrl;
