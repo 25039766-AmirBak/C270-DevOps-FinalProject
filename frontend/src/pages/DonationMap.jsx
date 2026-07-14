@@ -18,7 +18,7 @@ export default function DonationMap() {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
 
-  // Fetch real data from the backend
+  // 1. Fetch real data from the backend
   useEffect(() => {
     fetch('http://localhost:5000/api/donations') 
       .then((res) => {
@@ -29,7 +29,7 @@ export default function DonationMap() {
       .catch((error) => console.error("Error fetching donation data:", error));
   }, []);
 
-  // Initialize map and handle dynamic geocoding
+  // 2. Initialize map and handle dynamic geocoding
   useEffect(() => {
     if (!mapContainerRef.current) return;
 
@@ -50,7 +50,6 @@ export default function DonationMap() {
 
     // Helper function to geocode a single text location dynamically
     const plotDynamicMarker = async (item) => {
-      // If backend already has lat/lng, use it immediately
       let lat = item.lat || item.latitude;
       let lng = item.lng || item.longitude || item.lon;
 
@@ -76,9 +75,12 @@ export default function DonationMap() {
         }
       }
 
-      // If we have coordinates (either from database or API), drop the pin
+      // If we have coordinates, drop the pin with a tiny random offset (Jitter)
       if (lat && lng) {
-        L.marker([lat, lng])
+        const latOffset = (Math.random() - 0.5) * 0.0005; 
+        const lngOffset = (Math.random() - 0.5) * 0.0005;
+
+        L.marker([lat + latOffset, lng + lngOffset])
           .addTo(mapInstanceRef.current)
           .bindPopup(`
             <div>
@@ -93,16 +95,32 @@ export default function DonationMap() {
       }
     };
 
-    // Run the geocoding logic for every donation item
-    donations.forEach((item) => {
-      plotDynamicMarker(item);
-    });
+    // 3. Traffic Light Method: Run sequentially to prevent 429 Too Many Requests
+    const loadMarkersSlowly = async () => {
+      for (let i = 0; i < donations.length; i++) {
+        const item = donations[i];
+        
+        let lat = item.lat || item.latitude;
+        let lng = item.lng || item.longitude || item.lon;
+        
+        await plotDynamicMarker(item);
+
+        // Pause for 1.2 seconds if we had to ping the API
+        if (!lat || !lng) {
+          await new Promise(resolve => setTimeout(resolve, 1200)); 
+        }
+      }
+    };
+
+    // Kick off the throttled loading process
+    loadMarkersSlowly();
 
     return () => {
       // Map cleanup on unmount
     };
   }, [donations]);
 
+  // 4. Handle Search Repositioning
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!searchQuery.trim() || !mapInstanceRef.current) return;
