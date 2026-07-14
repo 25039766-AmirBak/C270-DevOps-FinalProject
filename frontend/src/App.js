@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute'; // 1. Import our new Gatekeeper
 import './styles/auth.css';
-    
+import DonationMap from './pages/DonationMap'; // (Adjust the path if your file is in a different folder!)
 // Pages
 import Home from './pages/Home';        
 import About from './pages/About';
@@ -18,7 +18,7 @@ import Dashboard from './pages/Dashboard';
 import Admin from './pages/Admin';
 import AdminUsers from './pages/AdminUsers';
 import AdminVerification from './pages/AdminVerification';
-         
+
 
 function App() {
   return (
@@ -29,7 +29,7 @@ function App() {
           {/* Public Routes - Anyone can see these */}
           <Route index element={<Home />} /> 
           <Route path="about" element={<About />} />
-          {/* <Route path="map" element={<MapView />} /> */}
+          <Route path="map" element={<DonationMap />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
           
