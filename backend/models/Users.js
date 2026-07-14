@@ -45,11 +45,13 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+// Hash the password before saving the user to database
 userSchema.pre('save', async function () {
   if (!this.isModified('password')) return;
   this.password = await bcrypt.hash(this.password, 10);
 });
 
+// Compare the plain password with the hashed password to authenticate user during login
 userSchema.methods.comparePassword = async function (candidate) {
   return bcrypt.compare(candidate, this.password);
 };
