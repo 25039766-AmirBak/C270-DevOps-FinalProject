@@ -157,6 +157,11 @@
     font-weight: bold;
 }
 
+.status-rejected{
+    color: red;
+    font-weight: bold;
+}
+
 .delete-request-btn{
     background:#dc2626;
     color:#fff;

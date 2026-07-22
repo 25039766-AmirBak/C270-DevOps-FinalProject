@@ -166,7 +166,7 @@ const RequestPage = () => {
                                 <tr key={request._id} style={{ borderBottom: '1px solid #e5e7eb' }}>
                                     <td style={{ padding: '10px 0' }}>{request.foodName}</td>
                                     <td>{request.quantityRemaining}</td>
-                                    <td className={request.status === "Pending" ? "status-pending" : "status-approved"}>
+                                    <td className={request.status === "Pending" ? "status-pending" : request.status == "Approved" ? "status-approved" : "status-rejected"}>
                                         {request.status}
                                     </td>
                                     <td className="request-date">
