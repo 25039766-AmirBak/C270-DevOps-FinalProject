@@ -18,6 +18,7 @@ import Dashboard from './pages/Dashboard';
 import Admin from './pages/Admin';
 import AdminUsers from './pages/AdminUsers';
 import AdminVerification from './pages/AdminVerification';
+import AdminFoodRequests from './pages/AdminFoodRequests';
 
 
 function App() {
@@ -59,6 +60,7 @@ function App() {
            <Route path="admin" element={<Admin />} />
            <Route path="admin/users" element={<AdminUsers />} />
            <Route path="admin/verification" element={<AdminVerification />} />
+           <Route path="admin/food-requests" element={<AdminFoodRequests />} />
           </Route>
           
         </Route>

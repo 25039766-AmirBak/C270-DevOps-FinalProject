@@ -97,6 +97,7 @@ const Layout = () => {
                       <Link to="/admin" style={{ color: '#F57C00', fontWeight: 'bold' }}>Admin Panel</Link>
                       <Link to="/admin/users">Manage Users</Link>
                       <Link to="/admin/verification">Verifications</Link>
+                      <Link to="/admin/food-requests">Food Requests</Link>
                     </div>
                   )}
                 </div>

@@ -53,6 +53,9 @@ function Admin() {
         <Link to="/admin/verification" className="download-link">
           View pending verification requests
         </Link>
+        <Link to="/admin/food-requests" className='download-link'>
+          View pending food requests
+        </Link>
       </nav>
     </div>
   );
