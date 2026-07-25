@@ -17,6 +17,8 @@ const donationRoutes = require("./routes/donationRoutes");
 const requestRoutes = require("./routes/requestRoutes");
 const authRoutes = require("./routes/authRoutes");
 const verificationRoutes = require("./routes/verificationRoutes");
+const locationRoutes = require("./routes/locations");
+const bookingRoutes = require("./routes/bookings");
 
 // Models
 const User = require('./models/Users');
@@ -36,6 +38,8 @@ app.use("/api/donations", donationRoutes);
 app.use("/api/requests", requestRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/verification", verificationRoutes);
+app.use("/api/locations", locationRoutes);
+app.use("/api/bookings", bookingRoutes);
 
 app.get("/", (req, res) => {
   res.send("Food Donation API is running");
