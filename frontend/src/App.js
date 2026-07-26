@@ -9,7 +9,9 @@ import About from './pages/About';
 import PostDonation from './pages/PostDonation'; 
 import RequestPage from './pages/RequestPage'; 
 import DonationMap from './pages/DonationMap';       
-// import Volunteer from './pages/Volunteer'; 
+import SchedulePage from './pages/SchedulePage';
+import ConfirmationPage from './pages/ConfirmationPage';
+import MyBookingsPage from './pages/MyBookingsPage';
 
 // Auth pages
 import Login from './pages/Login';
@@ -50,9 +52,11 @@ function App() {
           </Route>
 
           {/* Only 'Volunteer' can access, MUST BE VERIFIED */}
-          {/*<Route element={<ProtectedRoute allowedRoles={['Volunteer']} requiresVerification={true} />}> */}
-          {/*  <Route path="volunteer" element={<Volunteer />} /> */}
-          {/*</Route> */}
+          <Route element={<ProtectedRoute allowedRoles={['Volunteer']} requiresVerification={true} />}>
+  	    <Route path="volunteer" element={<SchedulePage />} />
+  	    <Route path="volunteer/confirmation/:bookingId" element={<ConfirmationPage />} />
+  	    <Route path="volunteer/my-bookings" element={<MyBookingsPage />} />
+	  </Route>
 
           {/* Only 'Admin' can access (NO verification needed here) */}
           <Route element={<ProtectedRoute allowedRoles={['Admin']} />}>
