@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-
 const Request = require("../models/Request");
+const { sendRequestUpdateEmail } = require('../utils/mailer');
 
 // Get all requests
 router.get("/", async (req, res) => {
@@ -56,31 +56,30 @@ router.delete("/:id", async (req, res) => {
 // Update request status
 router.put("/:id", async (req, res) => {
     try {
-
+        // Use .populate('requestedBy') to grab the user's email address
         const updatedRequest = await Request.findByIdAndUpdate(
             req.params.id,
-            {
-                status: req.body.status
-            },
-            {
-                new: true
-            }
-        );
+            { status: req.body.status },
+            { new: true }
+        ).populate('requestedBy', 'email');
 
         if (!updatedRequest) {
-            return res.status(404).json({
-                message: "Request not found"
-            });
+            return res.status(404).json({ message: "Request not found" });
+        }
+
+        // Send Email Notification
+        if (updatedRequest.requestedBy && updatedRequest.requestedBy.email) {
+            sendRequestUpdateEmail(
+                updatedRequest.requestedBy.email, 
+                updatedRequest.foodName, 
+                updatedRequest.status
+            );
         }
 
         res.json(updatedRequest);
 
     } catch (err) {
-
-        res.status(500).json({
-            message: err.message
-        });
-
+        res.status(500).json({ message: err.message });
     }
 });
 

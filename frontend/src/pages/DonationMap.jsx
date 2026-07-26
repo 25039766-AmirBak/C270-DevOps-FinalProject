@@ -35,7 +35,7 @@ export default function DonationMap() {
 
   // 1. Fetch real data
   useEffect(() => {
-    fetch('http://localhost:5000/api/donations') 
+    fetch(`${process.env.REACT_APP_API_URL}/api/donations`) 
       .then(res => res.json())
       .then(data => setDonations(data))
       .catch(err => console.error("Error fetching data:", err));

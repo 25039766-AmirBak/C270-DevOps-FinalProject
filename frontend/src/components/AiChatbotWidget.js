@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 const AiChatbotWidget = () => {
+    const { user } = useAuth();
+    
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
         { sender: 'ai', text: 'Hi! I am the SharePlate Assistant. How can I help you navigate the platform or package donations safely?' }
@@ -9,7 +12,6 @@ const AiChatbotWidget = () => {
     const [isTyping, setIsTyping] = useState(false);
     const messagesEndRef = useRef(null);
 
-    // Auto-scroll to the bottom when a new message appears
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
@@ -22,20 +24,24 @@ const AiChatbotWidget = () => {
         e.preventDefault();
         if (!input.trim()) return;
 
-        // 1. Render user message instantly
         const userMsg = { sender: 'user', text: input };
         setMessages((prev) => [...prev, userMsg]);
         const currentInput = input; 
-        setInput(''); // Clear the input field
+        setInput(''); 
         setIsTyping(true);
 
         try {
-            // 2. Send the message to Node.js backend
-            // Note: Make sure 5000 matches the port your backend actually runs on!
-            const response = await fetch('http://localhost:5000/api/chat', {
+            const rawRole = user?.role || user?.roles || [];
+            const activeRoles = Array.isArray(rawRole) ? rawRole : [rawRole];
+            const roleString = activeRoles.length > 0 ? activeRoles.join(', ') : 'Guest';
+
+            const response = await fetch(`${process.env.REACT_APP_API_URL}/api/chat`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: currentInput })
+                body: JSON.stringify({ 
+                    message: currentInput,
+                    role: roleString
+                })
             });
 
             if (!response.ok) {
@@ -44,7 +50,6 @@ const AiChatbotWidget = () => {
 
             const data = await response.json();
 
-            // 3. Render the real AI's response
             const aiResponse = { sender: 'ai', text: data.reply };
             setMessages((prev) => [...prev, aiResponse]);
             

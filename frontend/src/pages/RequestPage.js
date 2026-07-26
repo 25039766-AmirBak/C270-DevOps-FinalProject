@@ -14,7 +14,7 @@ const RequestPage = () => {
     useEffect(() => {
         const fetchLiveInventory = async () => {
             try {
-                const response = await fetch("http://localhost:5000/api/donations");
+                const response = await fetch(`${process.env.REACT_APP_API_URL}/api/donations`);
                 if (!response.ok) {
                     throw new Error("Failed to connect");
                 }
@@ -29,7 +29,7 @@ const RequestPage = () => {
 
         const fetchRequests = async () => {
             try {
-                const response = await fetch("http://localhost:5000/api/requests");
+                const response = await fetch(`${process.env.REACT_APP_API_URL}/api/requests`);
                 const data = await response.json();
                 setRequests(data);
             } catch (error) {
@@ -67,7 +67,7 @@ const RequestPage = () => {
     const handleDeleteRequest = async (id) => {
         try {
             const response = await fetch(
-                `http://localhost:5000/api/requests/${id}`,
+                `${process.env.REACT_APP_API_URL}/api/requests/${id}`,
                 {
                     method: "DELETE",
                 }
@@ -166,14 +166,14 @@ const RequestPage = () => {
                                 <tr key={request._id} style={{ borderBottom: '1px solid #e5e7eb' }}>
                                     <td style={{ padding: '10px 0' }}>{request.foodName}</td>
                                     <td>{request.quantityRemaining}</td>
-                                    <td className={request.status === "Pending" ? "status-pending" : request.status == "Approved" ? "status-approved" : "status-rejected"}>
+                                    <td className={request.status === "Pending" ? "status-pending" : request.status === "Approved" ? "status-approved" : "status-rejected"}>
                                         {request.status}
                                     </td>
                                     <td className="request-date">
                                         {new Date(request.createdAt).toLocaleDateString()}
                                     </td>
                                     <td>
-                                        {request.status == 'Pending' && (
+                                        {request.status === 'Pending' && (
                                             <button className='delete-request-btn'
                                             onClick={()=> {setSelectedRequestId(request._id);
                                                 setShowCancelModal(true);}
