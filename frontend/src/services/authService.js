@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const API = axios.create({ baseURL: 'http://localhost:5000/api/auth' });
-const VERIFICATION_API = axios.create({ baseURL: 'http://localhost:5000/api/verification' });
+const API = axios.create({ baseURL: `${process.env.REACT_APP_API_URL}/api/auth` });
+const VERIFICATION_API = axios.create({ baseURL: `${process.env.REACT_APP_API_URL}/api/verification` });
 
 const authService = {
   login: (email, password) => API.post('/login', { email, password }),

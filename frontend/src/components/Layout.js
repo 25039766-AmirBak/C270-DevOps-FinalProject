@@ -1,13 +1,10 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import AiChatbotWidget from './AiChatbotWidget';
 import { useAuth } from '../context/AuthContext'; // Import the hook
 
 const Layout = () => {
-  const { user, logout, loginAs } = useAuth(); 
-  
-  // --- State to track which checkboxes are ticked ---
-  const [demoRoles, setDemoRoles] = useState([]);
+  const { user, logout} = useAuth(); 
 
   const [adminMenuOpen, setAdminMenuOpen] = useState(false); // <-- Tracks the dropdown
 
@@ -26,23 +23,6 @@ const Layout = () => {
       logout(); 
     }, 10);
   };
-
-  // --- Function to handle checking/unchecking boxes ---
-  const handleRoleToggle = (e) => {
-    const role = e.target.value;
-    if (e.target.checked) {
-      setDemoRoles([...demoRoles, role]); // Add role if checked
-    } else {
-      setDemoRoles(demoRoles.filter((r) => r !== role)); // Remove if unchecked
-    }
-  };
-
-  // --- Clear checkboxes when user logs out ---
-  useEffect(() => {
-    if (!user) {
-      setDemoRoles([]);
-    }
-  }, [user]);
 
   return (
     <div className="app-container">
@@ -121,56 +101,6 @@ const Layout = () => {
            )}
         </div>
       </nav>
-
-      {/* --- TEMPORARY DEV TOOL FOR YOUR PRESENTATION --- */}
-      {/* Delete this entire div once Member 1 finishes the real login page */}
-      {!user && (
-        <div style={{ background: '#333', color: 'white', padding: '10px', textAlign: 'center' }}>
-          <small style={{ marginRight: '15px' }}>CA2 Presentation Demo Tools:</small>
-          
-          <label style={{ marginRight: '15px', cursor: 'pointer' }}>
-            <input 
-              type="checkbox" 
-              value="Donor" 
-              checked={demoRoles.includes('Donor')} 
-              onChange={handleRoleToggle} 
-            /> Donor
-          </label>
-          
-          <label style={{ marginRight: '15px', cursor: 'pointer' }}>
-            <input 
-              type="checkbox" 
-              value="Recipient" 
-              checked={demoRoles.includes('Recipient')} 
-              onChange={handleRoleToggle} 
-            /> Recipient
-          </label>
-          
-          <label style={{ marginRight: '15px', cursor: 'pointer' }}>
-            <input 
-              type="checkbox" 
-              value="Volunteer" 
-              checked={demoRoles.includes('Volunteer')} 
-              onChange={handleRoleToggle} 
-            /> Volunteer
-          </label>
-
-          <button 
-            onClick={() => loginAs(demoRoles)} 
-            disabled={demoRoles.length === 0}
-            style={{ 
-              background: demoRoles.length > 0 ? '#2E7D32' : '#555', 
-              color: 'white', 
-              border: 'none', 
-              padding: '4px 12px', 
-              borderRadius: '4px', 
-              cursor: demoRoles.length > 0 ? 'pointer' : 'not-allowed' 
-            }}
-          >
-            Login
-          </button>
-        </div>
-      )}
 
       {/* 2. Dynamic Content Area */}
       <main className="main-content">

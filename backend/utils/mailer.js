@@ -101,4 +101,73 @@ async function sendBookingConfirmationEmail(booking) {
   }
 }
 
-module.exports = { sendBookingConfirmationEmail };
+/**
+ * Sends an email when a user's verification status changes.
+ */
+async function sendVerificationEmail(userEmail, userName, status) {
+  const mailer = getTransporter();
+  if (!mailer) return { sent: false, reason: 'not-configured' };
+
+  const subject = `SharePlate: Your account verification is ${status}`;
+  const text = `Hi ${userName},\n\nYour account verification status has been updated to: ${status}.\n\n— SharePlate`;
+  const html = `
+    <div style="font-family: 'Inter', Arial, sans-serif; color: #1F2937;">
+      <h2 style="color: #2E7D32;">Account Verification Update</h2>
+      <p>Hi ${userName},</p>
+      <p>Your account verification status has been updated to: <strong>${status}</strong>.</p>
+      <p>— SharePlate</p>
+    </div>
+  `;
+
+  try {
+    await mailer.sendMail({
+      from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+      to: userEmail,
+      subject,
+      text,
+      html,
+    });
+    return { sent: true };
+  } catch (error) {
+    console.error('[mailer] Failed to send verification email:', error.message);
+    return { sent: false, reason: error.message };
+  }
+}
+
+/**
+ * Sends an email when a food request status changes.
+ */
+async function sendRequestUpdateEmail(userEmail, foodName, status) {
+  const mailer = getTransporter();
+  if (!mailer) return { sent: false, reason: 'not-configured' };
+
+  const subject = `SharePlate: Update on your request for ${foodName}`;
+  const text = `Your request for ${foodName} has been ${status}.\n\n— SharePlate`;
+  const html = `
+    <div style="font-family: 'Inter', Arial, sans-serif; color: #1F2937;">
+      <h2 style="color: #2E7D32;">Food Request Update</h2>
+      <p>Your request for <strong>${foodName}</strong> has been marked as: <strong>${status}</strong>.</p>
+      <p>— SharePlate</p>
+    </div>
+  `;
+
+  try {
+    await mailer.sendMail({
+      from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+      to: userEmail,
+      subject,
+      text,
+      html,
+    });
+    return { sent: true };
+  } catch (error) {
+    console.error('[mailer] Failed to send request update email:', error.message);
+    return { sent: false, reason: error.message };
+  }
+}
+
+module.exports = { 
+  sendBookingConfirmationEmail, 
+  sendVerificationEmail, 
+  sendRequestUpdateEmail 
+};

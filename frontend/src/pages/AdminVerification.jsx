@@ -55,7 +55,7 @@ function AdminVerification() {
                 <a
                   className="download-link"
                   // Point explicitly to your backend server port 5000
-                  href={`http://localhost:5000/uploads/${encodeURIComponent(item.document)}`}
+                  href={`${process.env.REACT_APP_API_URL}/uploads/${encodeURIComponent(item.document)}`}
                   target="_blank"
                   rel="noreferrer"
                 >

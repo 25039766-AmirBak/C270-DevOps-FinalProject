@@ -5,6 +5,7 @@ const auth = require('../middleware/authMiddleware');
 const { admin } = auth;
 const upload = require('../middleware/upload');
 const { uploadDocument } = require('../controllers/uploadController');
+const { sendVerificationEmail } = require('../utils/mailer');
 const User = require('../models/Users');
 
 router.post('/upload', auth, upload.single('document'), uploadDocument);
@@ -39,6 +40,9 @@ router.patch('/:id', auth, admin, async (req, res) => {
     }
 
     await user.save();
+
+    sendVerificationEmail(user.email, user.name, status);
+
     res.status(200).json({
       message: `Verification status updated to ${status}`,
       user: { id: user._id, verificationStatus: user.verificationStatus },
