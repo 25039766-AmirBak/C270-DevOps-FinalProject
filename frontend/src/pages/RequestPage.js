@@ -8,6 +8,8 @@ const RequestPage = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [message, setMessage] = useState("");
     const [requests, setRequests] = useState([]);
+    const [showCancelModal, setShowCancelModal] = useState(false);
+    const [selectedRequestId, setSelectedRequestId] = useState(null);
 
     useEffect(() => {
         const fetchLiveInventory = async () => {
@@ -60,6 +62,35 @@ const RequestPage = () => {
             </div>
         );
     }
+
+    // Delete Requests
+    const handleDeleteRequest = async (id) => {
+        try {
+            const response = await fetch(
+                `http://localhost:5000/api/requests/${id}`,
+                {
+                    method: "DELETE",
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Delete failed");
+            }
+
+            setRequests((prev) =>
+                prev.filter((request) => request._id !== id)
+            );
+
+            setMessage("Request cancelled successfully.");
+
+        } catch (error) {
+            console.error(error);
+            alert("Unable to cancel request.");
+        }
+
+        setShowCancelModal(false);
+        setSelectedRequestId(null);
+    };
 
     return (
         <div className="page-container request-page">
@@ -120,6 +151,7 @@ const RequestPage = () => {
                             <th>Quantity</th>
                             <th>Status</th>
                             <th>Date</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -134,11 +166,21 @@ const RequestPage = () => {
                                 <tr key={request._id} style={{ borderBottom: '1px solid #e5e7eb' }}>
                                     <td style={{ padding: '10px 0' }}>{request.foodName}</td>
                                     <td>{request.quantityRemaining}</td>
-                                    <td className={request.status === "Pending" ? "status-pending" : "status-approved"}>
+                                    <td className={request.status === "Pending" ? "status-pending" : request.status == "Approved" ? "status-approved" : "status-rejected"}>
                                         {request.status}
                                     </td>
                                     <td className="request-date">
                                         {new Date(request.createdAt).toLocaleDateString()}
+                                    </td>
+                                    <td>
+                                        {request.status == 'Pending' && (
+                                            <button className='delete-request-btn'
+                                            onClick={()=> {setSelectedRequestId(request._id);
+                                                setShowCancelModal(true);}
+                                            }>
+                                                Cancel
+                                            </button>
+                                        )}
                                     </td>
                                 </tr>
                             ))
@@ -146,6 +188,40 @@ const RequestPage = () => {
                     </tbody>
                 </table>
             </div>
+            {showCancelModal && (
+                <div className="modal-overlay">
+                    <div className="confirm-modal">
+
+                        <h3>Cancel Food Request?</h3>
+
+                        <p>
+                            Are you sure you want to cancel this food request?
+                        </p>
+
+                        <div className="modal-buttons">
+
+                            <button
+                                className="modal-cancel"
+                                onClick={() => {
+                                    setShowCancelModal(false);
+                                    setSelectedRequestId(null);
+                                }}
+                            >
+                                No
+                            </button>
+
+                            <button
+                                className="modal-confirm"
+                                onClick={() => handleDeleteRequest(selectedRequestId)}
+                            >
+                                Yes, Cancel Request
+                            </button>
+
+                        </div>
+
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
