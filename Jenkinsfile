@@ -100,9 +100,8 @@ pipeline {
         }
 
         stage('DevSecOps: Image Scanning') {
-          parallel {
-            stage('Scan Backend Image') {
-              steps {
+            steps {
+                // Scan Backend Image First
                 sh '''
                 ./trivy image \
                   --scanners vuln,secret \
@@ -114,11 +113,8 @@ pipeline {
                   --no-progress \
                   shareplate-backend:${SHORT_COMMIT}
                 '''
-            }
-        }
-
-        stage('Scan Frontend Image') {
-            steps {
+                
+                // Scan Frontend Image Second
                 sh '''
                 ./trivy image \
                   --scanners vuln,secret \
@@ -132,8 +128,6 @@ pipeline {
                 '''
             }
         }
-    }
-}
 
         stage('Finalize Images') {
             steps {
