@@ -31,24 +31,24 @@ pipeline {
                 TRIVY_ARCHIVE="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
                 TRIVY_CHECKSUMS="trivy_${TRIVY_VERSION}_checksums.txt"
 
-                # Download using the official filenames
-                wget -q \
+                # Download using curl (native to Jenkins containers) instead of wget
+                curl -sL \
                  "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/${TRIVY_ARCHIVE}" \
-                  -O "${TRIVY_ARCHIVE}"
+                  -o "${TRIVY_ARCHIVE}"
 
-               wget -q \
+                curl -sL \
                  "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/${TRIVY_CHECKSUMS}" \
-                  -O "${TRIVY_CHECKSUMS}"
+                  -o "${TRIVY_CHECKSUMS}"
 
-               # Verify the archive before executing it
-               grep " ${TRIVY_ARCHIVE}$" "${TRIVY_CHECKSUMS}" | sha256sum -c -
+                # Verify the archive before executing it
+                grep " ${TRIVY_ARCHIVE}$" "${TRIVY_CHECKSUMS}" | sha256sum -c -
 
-               tar -xzf "${TRIVY_ARCHIVE}" trivy
-               chmod +x trivy
-               ./trivy --version
+                tar -xzf "${TRIVY_ARCHIVE}" trivy
+                chmod +x trivy
+                ./trivy --version
 
-               # Scan team-owned files and dependency lockfiles
-               ./trivy fs . \
+                # Scan team-owned files and dependency lockfiles
+                ./trivy fs . \
                   --scanners vuln,secret,misconfig \
                   --severity HIGH,CRITICAL \
                   --skip-dirs "**/node_modules" \
@@ -59,7 +59,7 @@ pipeline {
                   --output trivy-repo-report.json \
                   --exit-code 1 \
                   --no-progress
-               '''
+                '''
              }
          }
 
