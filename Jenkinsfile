@@ -92,9 +92,8 @@ pipeline {
             steps {
                 sh '''
                 # Build the Docker images using the Git commit hash as the tag
-                # The --network host flag bypasses the Docker-in-Docker DNS block
-                docker build --network host -t shareplate-backend:${SHORT_COMMIT} ./backend
-                docker build --network host -t shareplate-frontend:${SHORT_COMMIT} ./frontend
+                docker build -t shareplate-backend:${SHORT_COMMIT} ./backend
+                docker build -t shareplate-frontend:${SHORT_COMMIT} ./frontend
                 '''
             }
         }
