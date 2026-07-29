@@ -1,6 +1,6 @@
 import 'leaflet/dist/leaflet.css';
 import '../styles/map.css';
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import L from "leaflet";
 
 // Fix default marker icon paths
@@ -23,23 +23,166 @@ const knownLocations = {
   "orchad": { lat: 1.3048, lng: 103.8318 } 
 };
 
+const learnedLocationsStorageKey = "donationMap.learnedLocations.v1";
+const geocodeDelayMs = 1200;
+
+const donationApiCandidates = [
+  `${process.env.REACT_APP_API_URL || ""}/api/donations`.replace(/([^:]\/)\/+/g, "$1"),
+  "http://localhost:5000/api/donations",
+  "/api/donations"
+];
+
+const toNumberOrNull = (value) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+const normalizeLocation = (value) => String(value || "").toLowerCase().trim();
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export default function DonationMap() {
   const [donations, setDonations] = useState([]); 
   const [searchQuery, setSearchQuery] = useState(""); 
   const [searchError, setSearchError] = useState(""); 
   const [activeFilter, setActiveFilter] = useState("all"); 
+  const [learnedLocations, setLearnedLocations] = useState({});
   
   const mapContainerRef = useRef(null); 
   const mapInstanceRef = useRef(null); 
   const isGeocodingRef = useRef(false); 
+  const geocodeInFlightRef = useRef(new Map());
+  const lastGeocodeAtRef = useRef(0);
+
+  useEffect(() => {
+    const serialized = window.localStorage.getItem(learnedLocationsStorageKey);
+    if (!serialized) return;
+
+    try {
+      const parsed = JSON.parse(serialized);
+      if (parsed && typeof parsed === "object") {
+        setLearnedLocations(parsed);
+      }
+    } catch (error) {
+      console.warn("Invalid learned locations cache. Resetting cache.", error);
+      window.localStorage.removeItem(learnedLocationsStorageKey);
+    }
+  }, []);
 
   // 1. Fetch real data
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL}/api/donations`) 
-      .then(res => res.json())
-      .then(data => setDonations(data))
-      .catch(err => console.error("Error fetching data:", err));
+    let cancelled = false;
+
+    const fetchDonations = async () => {
+      for (const url of donationApiCandidates) {
+        try {
+          const res = await fetch(url);
+          if (!res.ok) continue;
+          const data = await res.json();
+          if (!cancelled) {
+            setDonations(Array.isArray(data) ? data : []);
+          }
+          return;
+        } catch (err) {
+          console.warn(`Failed to fetch donations from ${url}:`, err);
+        }
+      }
+      if (!cancelled) {
+        setDonations([]);
+      }
+      console.error("Unable to load donations from any API endpoint.");
+    };
+
+    fetchDonations();
+
+    const intervalId = setInterval(fetchDonations, 15000);
+    const handleWindowFocus = () => fetchDonations();
+
+    window.addEventListener("focus", handleWindowFocus);
+
+    return () => {
+      cancelled = true;
+      clearInterval(intervalId);
+      window.removeEventListener("focus", handleWindowFocus);
+    };
   }, []);
+
+  const persistLearnedLocation = useCallback((locationName, lat, lng) => {
+    const normalized = normalizeLocation(locationName);
+    if (!normalized) return;
+
+    const safeLat = toNumberOrNull(lat);
+    const safeLng = toNumberOrNull(lng);
+    if (safeLat === null || safeLng === null) return;
+
+    setLearnedLocations((previous) => {
+      const existing = previous[normalized];
+      if (existing && existing.lat === safeLat && existing.lng === safeLng) {
+        return previous;
+      }
+
+      const updated = {
+        ...previous,
+        [normalized]: { lat: safeLat, lng: safeLng }
+      };
+
+      window.localStorage.setItem(learnedLocationsStorageKey, JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
+
+  const resolveCoordinatesFromLocation = useCallback(async (locationName) => {
+    const normalizedLocation = normalizeLocation(locationName);
+    if (!normalizedLocation) return null;
+
+    const cached = learnedLocations[normalizedLocation] || knownLocations[normalizedLocation];
+    if (cached) {
+      return { lat: cached.lat, lng: cached.lng, usedApi: false };
+    }
+
+    const inFlightRequest = geocodeInFlightRef.current.get(normalizedLocation);
+    if (inFlightRequest) {
+      return inFlightRequest;
+    }
+
+    const requestPromise = (async () => {
+      const now = Date.now();
+      const waitTime = geocodeDelayMs - (now - lastGeocodeAtRef.current);
+      if (waitTime > 0) {
+        await sleep(waitTime);
+      }
+
+      lastGeocodeAtRef.current = Date.now();
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(normalizedLocation + ", Singapore")}`
+      );
+      const data = await response.json();
+
+      if (!Array.isArray(data) || data.length === 0) {
+        return null;
+      }
+
+      const lat = toNumberOrNull(data[0].lat);
+      const lng = toNumberOrNull(data[0].lon);
+      if (lat === null || lng === null) {
+        return null;
+      }
+
+      persistLearnedLocation(normalizedLocation, lat, lng);
+      return { lat, lng, usedApi: true };
+    })();
+
+    geocodeInFlightRef.current.set(normalizedLocation, requestPromise);
+
+    try {
+      return await requestPromise;
+    } catch (error) {
+      console.warn("Geocoding failed for location:", normalizedLocation, error);
+      return null;
+    } finally {
+      geocodeInFlightRef.current.delete(normalizedLocation);
+    }
+  }, [learnedLocations, persistLearnedLocation]);
 
   // 🔥 CHANGE 1: We moved the filter math up here so the Map can use it!
   const uniqueLocations = new Set(donations.map(d => (d.location || "").toLowerCase().trim())).size;
@@ -77,32 +220,20 @@ export default function DonationMap() {
     });
 
     const plotDynamicMarker = async (item) => {
-      let lat = item.lat || item.latitude; 
-      let lng = item.lng || item.longitude || item.lon; 
+      let lat = toNumberOrNull(item.lat ?? item.latitude); 
+      let lng = toNumberOrNull(item.lng ?? item.longitude ?? item.lon); 
       let usedApi = false; 
 
-      if (!lat || !lng) {
-        const locString = (item.location || "").toLowerCase().trim();
-        
-        if (knownLocations[locString]) {
-          lat = knownLocations[locString].lat;
-          lng = knownLocations[locString].lng;
-        } else if (locString) {
-          try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(locString + ", Singapore")}`);
-            const data = await res.json();
-            if (data && data.length > 0) {
-              lat = parseFloat(data[0].lat);
-              lng = parseFloat(data[0].lon);
-              usedApi = true; 
-            }
-          } catch (err) {
-            console.warn("API blocked this request, skipping:", locString);
-          }
+      if (lat === null || lng === null) {
+        const resolved = await resolveCoordinatesFromLocation(item.location);
+        if (resolved) {
+          lat = resolved.lat;
+          lng = resolved.lng;
+          usedApi = resolved.usedApi;
         }
       }
 
-      if (lat && lng) {
+      if (lat !== null && lng !== null) {
         const latOffset = (Math.random() - 0.5) * 0.003; 
         const lngOffset = (Math.random() - 0.5) * 0.003;
 
@@ -126,18 +257,19 @@ export default function DonationMap() {
       // 🔥 CHANGE 3: The map now loops through displayedDonations!
       if (isGeocodingRef.current || displayedDonations.length === 0) return;
       isGeocodingRef.current = true; 
-      
-      for (let i = 0; i < displayedDonations.length; i++) {
-        const usedApi = await plotDynamicMarker(displayedDonations[i]);
-        if (usedApi) {
-          await new Promise(resolve => setTimeout(resolve, 1500)); 
+
+      try {
+        for (let i = 0; i < displayedDonations.length; i++) {
+          const usedApi = await plotDynamicMarker(displayedDonations[i]);
+          if (usedApi) continue;
         }
+      } finally {
+        isGeocodingRef.current = false; 
       }
-      isGeocodingRef.current = false; 
     };
 
     loadMarkers(); 
-  }, [displayedDonations]); 
+  }, [displayedDonations, resolveCoordinatesFromLocation]); 
 
 
   // --- SEARCH HANDLER ---
@@ -161,9 +293,10 @@ export default function DonationMap() {
 
   // --- CLICK-TO-PAN HELPER ---
   const focusOnLocation = (locName) => {
-    const locString = (locName || "").toLowerCase().trim();
-    if (knownLocations[locString] && mapInstanceRef.current) {
-      mapInstanceRef.current.setView([knownLocations[locString].lat, knownLocations[locString].lng], 14);
+    const locString = normalizeLocation(locName);
+    const coordinates = learnedLocations[locString] || knownLocations[locString];
+    if (coordinates && mapInstanceRef.current) {
+      mapInstanceRef.current.setView([coordinates.lat, coordinates.lng], 14);
     }
   };
 
