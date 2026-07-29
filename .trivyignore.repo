@@ -1,0 +1,28 @@
+# ====================================================================
+# SharePlate Documented Risk Acceptances (Repository File System Scan)
+# Review / Expiry Date for all entries: 2026-12-31
+# ====================================================================
+
+# Justification: Direct dependency in react-router-dom. 
+# Risk is mitigated as unstable RSC (React Server Components) APIs are not utilized in this project.
+GHSA-qwww-vcr4-c8h2
+
+# Justification: Transitive build dependencies originating from react-scripts.
+# These are isolated to the build process and have no direct exposure in the compiled production application. Awaiting upstream React patches.
+GHSA-vpq2-c234-7xj6
+GHSA-mh99-v99m-4gvg
+GHSA-rp65-9cf3-cjxr
+GHSA-7fh5-64p2-3v2j
+GHSA-qx2v-qp2m-jg93
+GHSA-6g55-p6wh-862q
+GHSA-r28c-9q8g-f849
+GHSA-5c6j-r48x-rmvq
+GHSA-qj8w-gfj5-8c6v
+GHSA-qpx9-hpmf-5gmw
+GHSA-w5hq-g745-h8pq
+CVE-2026-14257
+CVE-2021-3803
+CVE-2026-16221
+CVE-2026-27601
+CVE-2026-45623
+GHSA-2p49-hgcm-8545
