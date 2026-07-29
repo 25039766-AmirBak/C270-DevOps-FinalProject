@@ -1,0 +1,385 @@
+/* Request Page */
+
+.request-page-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.request-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.request-header h1 {
+    color: var(--primary-color);
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.request-header p {
+    color: #6B7280;
+    font-size: 1.1rem;
+}
+
+.request-card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+}
+
+.request-success {
+    background: #e8f5e9;
+    border: 1px solid #81c784;
+    color: #2e7d32;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.request-filter {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.request-filter select {
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    width: 220px;
+}
+
+.request-divider{
+    margin:40px 0;
+    border:1px solid #ddd;
+}
+
+/*Loading Spinner*/
+.loading-container{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    height:60vh;
+}
+
+.loading-spinner{
+    border:4px solid #f3f3f3;
+    border-top:4px solid #2196F3;
+    border-radius:50%;
+    width:40px;
+    height:40px;
+    animation:spin 1s linear infinite;
+    margin-bottom:20px;
+}
+
+@keyframes spin{
+    from{transform:rotate(0deg);}
+    to{transform:rotate(360deg);}
+}
+
+/*filter section*/
+.filter-container{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:15px;
+    margin-bottom:35px;
+}
+
+.filter-select{
+    width:220px;
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    font-size:15px;
+}
+
+/*My Requests*/
+.request-history{
+    margin-top:50px;
+    background:white;
+    border-radius:12px;
+    padding:25px;
+    box-shadow:0 3px 12px rgba(0,0,0,.08);
+}
+
+.request-history h2{
+    color:#2E7D32;
+    margin-bottom:20px;
+}
+
+.request-table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.request-table th{
+    background:#2E7D32;
+    color:white;
+    padding:12px;
+}
+
+.request-table td{
+    padding:12px;
+    border-bottom:1px solid #ddd;
+}
+
+.request-table tbody tr:hover{
+    background:#f8f8f8;
+}
+
+.request-table td,
+.request-table th {
+    padding: 12px;
+}
+
+.request-table tr {
+    border-bottom: 1px solid #ddd;
+}
+
+.empty-request {
+    text-align: center;
+    padding: 20px;
+}
+
+.status-pending {
+    color: orange;
+    font-weight: bold;
+}
+
+.status-approved {
+    color: green;
+    font-weight: bold;
+}
+
+.status-rejected{
+    color: red;
+    font-weight: bold;
+}
+
+.delete-request-btn{
+    background:#dc2626;
+    color:#fff;
+    border:none;
+    padding:8px 14px;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:600;
+}
+
+.delete-request-btn:hover{
+    background:#b91c1c;
+}
+
+/* Cancel comfirmation */
+.modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.45);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:2000;
+}
+
+.confirm-modal{
+    width:420px;
+    background:#fff;
+    border-radius:12px;
+    padding:30px;
+    text-align:center;
+    box-shadow:0 12px 30px rgba(0,0,0,.25);
+}
+
+.confirm-modal h3{
+    color:#2E7D32;
+    margin-bottom:15px;
+}
+
+.confirm-modal p{
+    color:#555;
+    margin-bottom:25px;
+}
+
+.modal-buttons{
+    display:flex;
+    justify-content:center;
+    gap:15px;
+}
+
+.modal-cancel{
+    padding:10px 20px;
+    border:none;
+    border-radius:8px;
+    background:#9e9e9e;
+    color:white;
+    cursor:pointer;
+}
+
+.modal-confirm{
+    padding:10px 20px;
+    border:none;
+    border-radius:8px;
+    background:#d32f2f;
+    color:white;
+    cursor:pointer;
+}
+
+.modal-confirm:hover{
+    background:#b71c1c;
+}
+
+.modal-cancel:hover{
+    background:#757575;
+}
+
+/* Donation Section */
+
+.donation-section{
+    margin-top:40px;
+}
+
+.donation-title{
+    text-align:center;
+    margin-bottom:30px;
+    color:#2E7D32;
+}
+
+.empty-donation{
+    text-align:center;
+    color:#666;
+    font-size:16px;
+}
+
+/* Grid */
+
+.donation-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+    gap:20px;
+}
+
+/* Card */
+
+.donation-card{
+    background:white;
+    border-radius:12px;
+    padding:20px;
+    border-top:5px solid #2E7D32;
+    box-shadow:0 2px 10px rgba(0,0,0,.1);
+    transition:.2s;
+}
+
+.donation-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 6px 16px rgba(0,0,0,.12);
+}
+
+.donation-card h3{
+    margin-top:0;
+    color:#2E7D32;
+}
+
+/* Status */
+
+.status-available{
+    color:green;
+    font-weight:bold;
+}
+
+.status-unavailable{
+    color:red;
+    font-weight:bold;
+}
+
+/* Request Button */
+
+.request-btn{
+    background:#2E7D32;
+    color:white;
+    border:none;
+    padding:10px 18px;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+    transition:.2s;
+}
+
+.request-btn:hover:not(:disabled){
+    background:#1B5E20;
+}
+
+.request-btn:disabled{
+    background:#999;
+    cursor:not-allowed;
+}
+
+/* Admin request */
+.request-summary{
+    display:flex;
+    gap:30px;
+    margin:15px 0 25px;
+    font-weight:600;
+}
+
+.request-summary span{
+    padding:8px 16px;
+    border-radius:6px;
+    background:#f3f4f6;
+}
+
+.request-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+.request-table th,
+.request-table td{
+    padding:12px;
+    border-bottom:1px solid #ddd;
+    text-align:left;
+}
+
+.request-table th{
+    background:#2E7D32;
+    color:#fff;
+}
+
+.status-pending{
+    color:#f59e0b;
+    font-weight:600;
+}
+
+.status-approved{
+    color:#16a34a;
+    font-weight:600;
+}
+
+.status-rejected{
+    color:#dc2626;
+    font-weight:600;
+}
+
+.approve-btn{
+    background:#2E7D32;
+    color:#fff;
+    border:none;
+    padding:8px 14px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.reject-btn{
+    background:#dc2626;
+    color:#fff;
+    border:none;
+    padding:8px 14px;
+    border-radius:6px;
+    cursor:pointer;
+}

@@ -1,0 +1,409 @@
+/* --- VOLUNTEER SCHEDULE + CONFIRMATION PAGES --- */
+/* Shares the same design language as the homepage (styles/home.css) and the
+   request page (styles/request.css): white 12px-radius cards, soft shadows,
+   var(--primary-color) / var(--secondary-color) accents. */
+
+.volunteer-page-container,
+.confirmation-page-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.volunteer-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.volunteer-header .eyebrow {
+    display: inline-block;
+    color: var(--secondary-color);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+}
+
+.volunteer-header h1 {
+    color: var(--primary-color);
+    font-size: 2.5rem;
+    margin: 0 0 10px 0;
+}
+
+.volunteer-header p {
+    color: #6B7280;
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Identity banner — shows the logged-in volunteer's name/email automatically */
+.volunteer-identity {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 18px 25px;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    flex-wrap: wrap;
+    border-left: 4px solid var(--primary-color);
+}
+
+.volunteer-identity .identity-label {
+    color: #6B7280;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 0 0 4px 0;
+}
+
+.volunteer-identity .identity-value {
+    font-weight: 700;
+    color: var(--text-dark);
+    font-size: 1.05rem;
+    margin: 0;
+}
+
+.volunteer-identity .identity-email {
+    color: #6B7280;
+    font-weight: 400;
+    margin-left: 8px;
+    font-size: 0.95rem;
+}
+
+/* Stack the "My Bookings" button below the identity card on small screens */
+@media (max-width: 640px) {
+    .volunteer-identity {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+
+    .volunteer-identity > .btn {
+        width: 100%;
+    }
+}
+
+/* --- My Bookings page --- */
+.my-bookings-map-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 20px 25px;
+    margin-bottom: 35px;
+}
+
+.my-bookings-map-card h2 {
+    color: var(--text-dark);
+    font-size: 1.3rem;
+    margin: 0 0 6px 0;
+}
+
+.my-bookings-map-card .card-subtitle {
+    color: #6B7280;
+    font-size: 0.9rem;
+    margin: 0 0 15px 0;
+}
+
+.my-bookings-map {
+    height: 420px;
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid #E5E7EB;
+    z-index: 0;
+}
+
+.booking-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.booking-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-left: 4px solid var(--primary-color);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.booking-card.muted {
+    border-left-color: #D1D5DB;
+    opacity: 0.75;
+}
+
+.booking-card-main h3 {
+    margin: 8px 0 4px 0;
+    font-size: 1.05rem;
+    color: var(--text-dark);
+}
+
+.booking-recipient {
+    font-weight: 600;
+    color: var(--text-dark);
+    margin: 0;
+}
+
+.booking-address {
+    color: #6B7280;
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.status-confirmed {
+    background-color: #ECFDF5;
+    color: #065F46;
+}
+
+.status-cancelled {
+    background-color: #FEF2F2;
+    color: #991B1B;
+}
+
+.cancel-btn {
+    align-self: flex-start;
+    padding: 0.55rem 1.1rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: 1px solid #DC2626;
+    background: white;
+    color: #DC2626;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.cancel-btn:hover:not(:disabled) {
+    background-color: #DC2626;
+    color: white;
+}
+
+.cancel-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Date selector */
+.date-selector {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 35px;
+}
+
+.date-chip {
+    background: white;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    padding: 10px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: 0.2s ease;
+    min-width: 60px;
+}
+
+.date-chip:hover {
+    border-color: var(--primary-color);
+}
+
+.date-chip.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.date-chip .date-num {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+.date-chip .date-label {
+    font-size: 0.8rem;
+    color: #6B7280;
+    text-transform: uppercase;
+}
+
+.date-chip.active .date-num,
+.date-chip.active .date-label {
+    color: white;
+}
+
+/* Location sections */
+.location-section {
+    margin-bottom: 40px;
+}
+
+.location-section h2 {
+    color: var(--text-dark);
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+    border-left: 4px solid var(--secondary-color);
+    padding-left: 12px;
+}
+
+.slot-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.slot-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-top: 4px solid var(--primary-color);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.slot-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+.slot-card.afternoon { border-top-color: var(--secondary-color); }
+.slot-card.evening { border-top-color: #6D28D9; }
+
+.slot-card .slot-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text-dark);
+}
+
+.slot-card .slot-status {
+    font-size: 0.85rem;
+    color: #6B7280;
+    font-weight: 600;
+}
+
+.book-btn {
+    margin-top: 8px;
+    width: 100%;
+    padding: 0.65rem 1.25rem;
+    border-radius: 6px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    background-color: var(--primary-color);
+    color: white;
+    transition: background-color 0.2s ease;
+}
+
+.book-btn:hover:not(:disabled) {
+    background-color: #1b5e20;
+}
+
+.book-btn:disabled {
+    background-color: #9CA3AF;
+    cursor: not-allowed;
+}
+
+/* Status / error messages, in the same voice as global .message */
+.status-msg {
+    text-align: center;
+    color: #6B7280;
+    font-size: 1rem;
+    padding: 20px 0;
+}
+
+.status-msg.error {
+    color: #DC2626;
+    font-weight: 600;
+}
+
+/* --- Confirmation page --- */
+.confirmation-page-container {
+    max-width: 560px;
+    display: flex;
+    justify-content: center;
+}
+
+.confirmation-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    padding: 40px;
+    text-align: center;
+    width: 100%;
+}
+
+.confirmation-badge {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px auto;
+}
+
+.confirmation-card h1 {
+    color: var(--primary-color);
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+}
+
+.confirmation-sub {
+    color: #6B7280;
+    margin-bottom: 25px;
+}
+
+.confirmation-details {
+    text-align: left;
+    background: var(--background-light);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    color: #6B7280;
+    font-weight: 600;
+}
+
+.detail-value {
+    color: var(--text-dark);
+    font-weight: 700;
+    text-align: right;
+}
+
+.status-pill {
+    display: inline-block;
+    background-color: #ECFDF5;
+    color: #065F46;
+    border-radius: 999px;
+    padding: 2px 12px;
+    font-size: 0.85rem;
+}
+
+.error-card h1 {
+    color: #DC2626;
+}
