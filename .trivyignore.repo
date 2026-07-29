@@ -1,28 +1,33 @@
-# ====================================================================
-# SharePlate Documented Risk Acceptances (Repository File System Scan)
-# Review / Expiry Date for all entries: 2026-12-31
-# ====================================================================
+# SharePlate repository vulnerability risk acceptances
+# Reviewed: 2026-07-29
+# Owner: DevSecOps
+# Reviewer: CI/CD team
+#
+# These exceptions apply only to the repository filesystem scan.
+# They must not be passed to Docker image scans.
+# Every acceptance expires on 2026-12-31 and must then be reviewed again.
 
-# Justification: Direct dependency in react-router-dom. 
-# Risk is mitigated as unstable RSC (React Server Components) APIs are not utilized in this project.
-GHSA-qwww-vcr4-c8h2
+# Direct dependency: react-router-dom -> react-router.
+# SharePlate does not use the unstable React Server Components APIs required
+# for this vulnerability to be exploitable. A major-version upgrade to the
+# fixed release requires separate compatibility testing.
+GHSA-qwww-vcr4-c8h2 exp:2026-12-31
 
-# Justification: Transitive build dependencies originating from react-scripts.
-# These are isolated to the build process and have no direct exposure in the compiled production application. Awaiting upstream React patches.
-GHSA-vpq2-c234-7xj6
-GHSA-mh99-v99m-4gvg
-GHSA-rp65-9cf3-cjxr
-GHSA-7fh5-64p2-3v2j
-GHSA-qx2v-qp2m-jg93
-GHSA-6g55-p6wh-862q
-GHSA-r28c-9q8g-f849
-GHSA-5c6j-r48x-rmvq
-GHSA-qj8w-gfj5-8c6v
-GHSA-qpx9-hpmf-5gmw
-GHSA-w5hq-g745-h8pq
-CVE-2026-14257
-CVE-2021-3803
-CVE-2026-16221
-CVE-2026-27601
-CVE-2026-45623
-GHSA-2p49-hgcm-8545
+# Transitive frontend build dependency: react-scripts -> SVGR/SVGO -> nth-check.
+# Used during asset compilation; it is not shipped as an application API that
+# processes attacker-controlled selector expressions at runtime.
+CVE-2021-3803 exp:2026-12-31
+
+# Transitive frontend build dependencies through react-scripts tooling.
+# These packages process build inputs rather than untrusted production requests.
+# Replacement requires migration away from the affected react-scripts toolchain.
+CVE-2026-14257 exp:2026-12-31
+CVE-2026-27601 exp:2026-12-31
+GHSA-5c6j-r48x-rmvq exp:2026-12-31
+GHSA-2p49-hgcm-8545 exp:2026-12-31
+
+# Transitive PostCSS build dependency introduced by resolve-url-loader.
+# SharePlate does not accept or process user-supplied CSS at runtime.
+# Upgrade is pending compatibility testing of the frontend build toolchain.
+CVE-2026-45623 exp:2026-12-31
+GHSA-r28c-9q8g-f849 exp:2026-12-31
