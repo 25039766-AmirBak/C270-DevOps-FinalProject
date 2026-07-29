@@ -1,0 +1,20 @@
+# Documented Risk Acceptance for SharePlate CA2
+# These are unfixable transitive dependencies tied to react-scripts.
+# Acknowledged by the CI/CD and DevSecOps team.
+
+GHSA-vpq2-c234-7xj6
+GHSA-mh99-v99m-4gvg
+GHSA-rp65-9cf3-cjxr
+GHSA-7fh5-64p2-3v2j
+GHSA-qx2v-qp2m-jg93
+GHSA-6g55-p6wh-862q
+GHSA-r28c-9q8g-f849
+GHSA-qwww-vcr4-c8h2
+GHSA-5c6j-r48x-rmvq
+GHSA-qj8w-gfj5-8c6v
+GHSA-qpx9-hpmf-5gmw
+GHSA-w5hq-g745-h8pq
+CVE-2026-14257
+CVE-2021-3803
+CVE-2026-16221
+CVE-2026-27601
