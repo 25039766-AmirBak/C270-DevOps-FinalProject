@@ -22,7 +22,9 @@ const updateRequestStatus = (id, status, token) => {
   );
 };
 
-export default {
+const requestService = {
   getAllRequests,
   updateRequestStatus,
 };
+
+export default requestService;
