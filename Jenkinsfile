@@ -2,39 +2,66 @@ pipeline {
     agent any
 
     tools {
-        nodejs 'NodeJS' 
-    }
-
-    environment {
-        // Creates a short, 7-character Git commit hash to tag the Docker images uniquely
-        SHORT_COMMIT = "${env.GIT_COMMIT}".substring(0, 7)
+        nodejs 'NodeJS'
     }
 
     stages {
         stage('Checkout Code') {
-            steps {
-                checkout scm
+          steps {
+            checkout scm
+
+            script {
+               env.SHORT_COMMIT = sh(
+                 script: 'git rev-parse --short=7 HEAD',
+                 returnStdout: true
+                 ).trim()
+
+                echo "Building commit: ${env.SHORT_COMMIT}"
             }
-        }
+         }
+      }
+
 
         stage('DevSecOps: Repository Scan') {
             steps {
                 sh '''
-                # 1. Download Trivy v0.72.0 and its official checksums
-                wget -qO trivy.tar.gz https://github.com/aquasecurity/trivy/releases/download/v0.72.0/trivy_0.72.0_Linux-64bit.tar.gz
-                wget -qO checksums.txt https://github.com/aquasecurity/trivy/releases/download/v0.72.0/trivy_0.72.0_checksums.txt
-                
-                # 2. Verify the SHA-256 checksum to prevent supply chain attacks
-                grep trivy_0.72.0_Linux-64bit.tar.gz checksums.txt | sha256sum -c -
-                
-                # 3. Extract the scanner
-                tar zxvf trivy.tar.gz trivy
-                
-                # 4. Scan the repository explicitly using the .trivyignore.repo file
-                ./trivy fs . --severity HIGH,CRITICAL --ignorefile .trivyignore.repo --format json --output trivy-repo-report.json --exit-code 1
-                '''
-            }
-        }
+                set -eu
+
+                TRIVY_VERSION="0.72.0"
+                TRIVY_ARCHIVE="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+                TRIVY_CHECKSUMS="trivy_${TRIVY_VERSION}_checksums.txt"
+
+                # Download using the official filenames
+                wget -q \
+                 "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/${TRIVY_ARCHIVE}" \
+                  -O "${TRIVY_ARCHIVE}"
+
+               wget -q \
+                 "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/${TRIVY_CHECKSUMS}" \
+                  -O "${TRIVY_CHECKSUMS}"
+
+               # Verify the archive before executing it
+               grep " ${TRIVY_ARCHIVE}$" "${TRIVY_CHECKSUMS}" | sha256sum -c -
+
+               tar -xzf "${TRIVY_ARCHIVE}" trivy
+               chmod +x trivy
+               ./trivy --version
+
+               # Scan team-owned files and dependency lockfiles
+               ./trivy fs . \
+                  --scanners vuln,secret,misconfig \
+                  --severity HIGH,CRITICAL \
+                  --skip-dirs "**/node_modules" \
+                  --skip-dirs ".git" \
+                  --ignorefile .trivyignore.repo \
+                  --show-suppressed \
+                  --format json \
+                  --output trivy-repo-report.json \
+                  --exit-code 1 \
+                  --no-progress
+               '''
+             }
+         }
 
         stage('Backend Foundation') {
             steps {
@@ -72,27 +99,55 @@ pipeline {
         }
 
         stage('DevSecOps: Image Scanning') {
-            steps {
+          parallel {
+            stage('Scan Backend Image') {
+              steps {
                 sh '''
-                # Scan the newly compiled Docker images for vulnerabilities
-                ./trivy image --severity HIGH,CRITICAL --format json --output trivy-backend-report.json --exit-code 1 shareplate-backend:${SHORT_COMMIT}
-                
-                ./trivy image --severity HIGH,CRITICAL --format json --output trivy-frontend-report.json --exit-code 1 shareplate-frontend:${SHORT_COMMIT}
+                ./trivy image \
+                  --scanners vuln,secret \
+                  --image-config-scanners misconfig,secret \
+                  --severity HIGH,CRITICAL \
+                  --format json \
+                  --output trivy-backend-report.json \
+                  --exit-code 1 \
+                  --no-progress \
+                  shareplate-backend:${SHORT_COMMIT}
                 '''
             }
         }
 
-        stage('Finalize & Archive') {
+        stage('Scan Frontend Image') {
+            steps {
+                sh '''
+                ./trivy image \
+                  --scanners vuln,secret \
+                  --image-config-scanners misconfig,secret \
+                  --severity HIGH,CRITICAL \
+                  --format json \
+                  --output trivy-frontend-report.json \
+                  --exit-code 1 \
+                  --no-progress \
+                  shareplate-frontend:${SHORT_COMMIT}
+                '''
+            }
+        }
+    }
+}
+
+        stage('Finalize Images') {
             steps {
                 sh '''
                 # If the image scans pass, safely tag them as 'latest' for deployment
                 docker tag shareplate-backend:${SHORT_COMMIT} shareplate-backend:latest
                 docker tag shareplate-frontend:${SHORT_COMMIT} shareplate-frontend:latest
                 '''
-                
-                // Save all security JSON reports so the team (and lecturer) can download them
-                archiveArtifacts artifacts: '*.json', allowEmptyArchive: true
-            }
+             }
+        }
+    }
+    post {
+        always {
+            archiveArtifacts artifacts: 'trivy-*-report.json',
+                             allowEmptyArchive: true
         }
     }
 }
