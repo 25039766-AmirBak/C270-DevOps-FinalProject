@@ -100,34 +100,56 @@ pipeline {
         }
 
         stage('DevSecOps: Image Scanning') {
-            steps {
-                // Scan Backend Image First
-                sh '''
-                ./trivy image \
-                  --scanners vuln,secret \
-                  --image-config-scanners misconfig,secret \
-                  --severity HIGH,CRITICAL \
-                  --format json \
-                  --output trivy-backend-report.json \
-                  --exit-code 1 \
-                  --no-progress \
-                  shareplate-backend:${SHORT_COMMIT}
-                '''
-                
-                // Scan Frontend Image Second
-                sh '''
-                ./trivy image \
-                  --scanners vuln,secret \
-                  --image-config-scanners misconfig,secret \
-                  --severity HIGH,CRITICAL \
-                  --format json \
-                  --output trivy-frontend-report.json \
-                  --exit-code 1 \
-                  --no-progress \
-                  shareplate-frontend:${SHORT_COMMIT}
-                '''
-            }
-        }
+          steps {
+             sh '''
+             # Continue temporarily so both reports are generated
+             set +e
+
+             echo "Scanning backend image..."
+
+             ./trivy image \
+              --scanners vuln,secret \
+              --image-config-scanners misconfig,secret \
+              --severity HIGH,CRITICAL \
+              --format json \
+              --output trivy-backend-report.json \
+              --exit-code 1 \
+              --no-progress \
+              shareplate-backend:${SHORT_COMMIT}
+
+              BACKEND_SCAN_RESULT=$?
+
+              echo "Scanning frontend image..."
+
+             ./trivy image \
+               --scanners vuln,secret \
+               --image-config-scanners misconfig,secret \
+               --severity HIGH,CRITICAL \
+               --format json \
+               --output trivy-frontend-report.json \
+               --exit-code 1 \
+               --no-progress \
+               shareplate-frontend:${SHORT_COMMIT}
+
+             FRONTEND_SCAN_RESULT=$?
+
+             # Return to normal fail-fast behaviour
+             set -e
+
+             echo "Backend scan exit code: ${BACKEND_SCAN_RESULT}"
+             echo "Frontend scan exit code: ${FRONTEND_SCAN_RESULT}"
+
+             # Fail only after both scans and reports are completed
+             if [ "${BACKEND_SCAN_RESULT}" -ne 0 ] || \
+                [ "${FRONTEND_SCAN_RESULT}" -ne 0 ]; then
+                 echo "Security gate failed: at least one image has a HIGH/CRITICAL finding or scan error."
+                 exit 1
+             fi
+
+             echo "Security gate passed: both images passed Trivy scanning."
+             '''
+          }
+      }
 
         stage('Finalize Images') {
             steps {
