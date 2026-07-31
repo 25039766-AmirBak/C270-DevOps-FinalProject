@@ -1,0 +1,12 @@
+---
+project_directory: /home/amir/FA/C270-DevOps-FinalProject
+
+compose_command: docker-compose
+
+compose_file: docker-compose.yml
+
+frontend_url: http://localhost:3000
+
+shareplate_url: http://localhost:5000
+
+port: 5000
