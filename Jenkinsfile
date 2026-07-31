@@ -160,6 +160,22 @@ pipeline {
                 '''
              }
         }
+
+        stage('Continuous Deployment (CD)') {
+            steps {
+                echo 'Handing off to Ansible for Continuous Deployment...'
+                
+                // We use Jenkins credentials to securely run the playbook against the production server
+                sshagent(['production-server-ssh-key']) {
+                    sh '''
+                    # Trigger Bakman's Ansible playbook
+                    # This tells Ansible to deploy the latest images to the production environment
+                    
+                    ansible-playbook -i inventory.ini deploy.yml
+                    '''
+                }
+            }
+        }
     }
     post {
         always {
