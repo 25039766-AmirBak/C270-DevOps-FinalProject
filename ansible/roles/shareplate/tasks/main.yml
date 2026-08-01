@@ -1,0 +1,63 @@
+# verify Docker exists
+- name: Check Docker installation
+  command: docker --version
+
+# Check Docker daemon
+- name: Verify Docker daemon
+  service:
+    name: docker
+    state: started
+
+# Verify project exists
+- name: Verify project directory
+  stat:
+    path: "{{ project_directory }}"
+  register: project
+
+#Stop containers
+- name: Stop SharePlate
+  command:
+    cmd: "{{ compose_command }} down"
+    chdir: "{{ project_directory }}"
+
+# Build containers
+- name: Build latest containers
+  command:
+    cmd: "{{ compose_command }} build"
+    chdir: "{{ project_directory }}"
+
+# Creates backend .env file
+- name: Create backend environment file
+  template:
+    src: backend.env.j2
+    dest: "{{ project_directory }}/backend/.env"
+    mode: '0600'
+
+# CReates frontend .env file
+- name: Create frontend environment file
+  template:
+    src: frontend.env.j2
+    dest: "{{ project_directory }}/frontend/.env"
+    mode: '0600'
+
+# Start containers
+- name: Start containers
+  command:
+    cmd: "{{ compose_command }} up -d"
+    chdir: "{{ project_directory }}"
+
+# Check containers
+- name: Running containers
+  command: docker ps
+  register: containers
+
+
+# Display Result
+- debug:
+    var: containers.stdout_lines
+
+# Health Check
+- name: Check frontend
+  uri:
+    url: "{{ shareplate_url }}"
+    status_code: 200

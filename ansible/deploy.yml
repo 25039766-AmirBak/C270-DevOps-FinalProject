@@ -1,0 +1,7 @@
+---
+- name: Deploy SharePlate
+  hosts: local
+  become: yes
+
+  roles:
+    - shareplate
