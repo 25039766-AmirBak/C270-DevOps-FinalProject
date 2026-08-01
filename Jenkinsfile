@@ -165,13 +165,22 @@ pipeline {
             steps {
                 echo 'Handing off to Ansible for Continuous Deployment...'
                 
-                // We use Jenkins credentials to securely run the playbook against the production server
                 sshagent(['production-server-ssh-key']) {
                     sh '''
-                    # Trigger Bakman's Ansible playbook
-                    # This tells Ansible to deploy the latest images to the production environment
+                    # Disable host key checking so Ansible doesn't get stuck asking "Are you sure you want to connect?"
+                    export ANSIBLE_HOST_KEY_CHECKING=False
                     
-                    ansible-playbook -i inventory.ini deploy.yml
+                    # Navigate into Bakman's new folder
+                    cd ansible
+                    
+                    # Create a temporary file with Bakman's vault password
+                    echo 'vault' > .vault_pass.txt
+                    
+                    # Run the playbook using the password file
+                    ansible-playbook -i inventory.ini deploy.yml --vault-password-file .vault_pass.txt
+                    
+                    # Efficiently clean up the password file so it is not left on the system
+                    rm .vault_pass.txt
                     '''
                 }
             }
