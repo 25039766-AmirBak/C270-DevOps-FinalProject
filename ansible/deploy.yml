@@ -1,6 +1,6 @@
 ---
 - name: Deploy SharePlate
-  hosts: local
+  hosts: production
   become: yes
 
   roles:
