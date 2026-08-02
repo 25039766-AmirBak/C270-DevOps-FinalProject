@@ -1,7 +1,24 @@
 ---
 - name: Deploy SharePlate
   hosts: production
-  become: yes
+
+  pre_tasks:
+    - name: Validate deployment inputs from Jenkins and Ansible Vault
+      ansible.builtin.assert:
+        that:
+          - (deploy_version | default('') | string | length) > 0
+          - (image_archive | default('') | string | length) > 0
+          - (mongo_uri | default('') | string | length) > 0
+          - (gemini_api_key | default('') | string | length) > 0
+          - (jwt_secret | default('') | string | length) > 0
+          - (email_host | default('') | string | length) > 0
+          - (email_port | default('') | string | length) > 0
+          - (email_user | default('') | string | length) > 0
+          - (email_pass | default('') | string | length) > 0
+          - (email_from | default('') | string | length) > 0
+        fail_msg: >-
+          Required deployment variables are missing. Check the Jenkins
+          ansible-vault-vars and ansible-vault-password credentials.
 
   roles:
     - shareplate

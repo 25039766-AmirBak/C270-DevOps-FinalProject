@@ -1,0 +1,12 @@
+---
+# Create an encrypted copy of this structure with `ansible-vault create`.
+# Store the encrypted YAML as the Jenkins secret-file credential
+# `ansible-vault-vars`. Never place real values in this example file.
+mongo_uri: "REPLACE_WITH_MONGODB_URI"
+gemini_api_key: "REPLACE_WITH_GEMINI_API_KEY"
+jwt_secret: "REPLACE_WITH_LONG_RANDOM_JWT_SECRET"
+email_host: "REPLACE_WITH_SMTP_HOST"
+email_port: "587"
+email_user: "REPLACE_WITH_SMTP_USERNAME"
+email_pass: "REPLACE_WITH_SMTP_PASSWORD"
+email_from: "REPLACE_WITH_FROM_ADDRESS"

@@ -1,10 +1,9 @@
-version: "3.8"
-
 services:
   # -----------------------------------------
   # SERVICE 1: The Express Node.js Backend
   # ----------------------------------------
   backend:
+    image: shareplate-backend:${IMAGE_TAG:-latest}
     build:
       context: ./backend      # Tells Compose to look in the /backend folder for Ahmad's Dockerfile
     container_name: shareplate-backend
@@ -18,13 +17,12 @@ services:
   # SERVICE 2: The React Frontend
   # ----------------------------------------
   frontend:
+    image: shareplate-frontend:${IMAGE_TAG:-latest}
     build:
       context: ./frontend     # Tells Compose to look in the /frontend folder for Ahmad's Dockerfile
     container_name: shareplate-frontend
     ports:
       - "3000:3000"           # Maps your VM's port 3000 to the container's port 3000
-    env_file:
-      - ./frontend/.env       # Injects the REACT_APP_API_URL we created earlier
     depends_on:
       - backend               # Ensures the backend boots up BEFORE the frontend
     restart: unless-stopped   # Keeps the UI online even if the container restarts

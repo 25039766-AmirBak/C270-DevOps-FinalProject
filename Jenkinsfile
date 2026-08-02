@@ -5,6 +5,12 @@ pipeline {
         nodejs 'NodeJS'
     }
 
+    environment {
+        // React embeds this value during the frontend image build.
+        // Update it when the production host or API domain changes.
+        PUBLIC_BACKEND_URL = 'http://157.230.38.201:5000'
+    }
+
     stages {
         stage('Checkout Code') {
           steps {
@@ -94,7 +100,9 @@ pipeline {
                 # Build the Docker images using the Git commit hash as the tag
                 # The --network host flag bypasses the Docker-in-Docker DNS block
                 docker build --network host -t shareplate-backend:${SHORT_COMMIT} ./backend
-                docker build --network host -t shareplate-frontend:${SHORT_COMMIT} ./frontend
+                docker build --network host \
+                  --build-arg REACT_APP_API_URL="${PUBLIC_BACKEND_URL}" \
+                  -t shareplate-frontend:${SHORT_COMMIT} ./frontend
                 '''
             }
         }
@@ -151,12 +159,15 @@ pipeline {
           }
       }
 
-        stage('Finalize Images') {
+        stage('Package Scanned Images') {
             steps {
                 sh '''
-                # If the image scans pass, safely tag them as 'latest' for deployment
-                docker tag shareplate-backend:${SHORT_COMMIT} shareplate-backend:latest
-                docker tag shareplate-frontend:${SHORT_COMMIT} shareplate-frontend:latest
+                # Package the exact images that passed Trivy. Ansible transfers this
+                # archive to production, so the server never rebuilds unscanned images.
+                docker save \
+                  shareplate-backend:${SHORT_COMMIT} \
+                  shareplate-frontend:${SHORT_COMMIT} \
+                  | gzip > "shareplate-images-${SHORT_COMMIT}.tar.gz"
                 '''
              }
         }
@@ -165,14 +176,31 @@ pipeline {
             steps {
                 echo 'Handing off to Ansible for Continuous Deployment...'
                 
-                // We use Jenkins credentials to securely run the playbook against the production server
-                sshagent(['production-server-ssh-key']) {
-                    sh '''
-                    # Trigger Bakman's Ansible playbook
-                    # This tells Ansible to deploy the latest images to the production environment
-                    
-                    ansible-playbook -i inventory.ini deploy.yml
-                    '''
+                dir('ansible') {
+                    // SSH connects to production. The two secret-file credentials
+                    // provide the encrypted Vault data and its separate password.
+                    sshagent(['production-server-ssh-key']) {
+                        withCredentials([
+                            file(credentialsId: 'ansible-vault-vars', variable: 'VAULT_VARS_FILE'),
+                            file(credentialsId: 'ansible-vault-password', variable: 'VAULT_PASSWORD_FILE')
+                        ]) {
+                            sh '''
+                            ansible-playbook --syntax-check \
+                              -i inventory.ini deploy.yml \
+                              --vault-password-file "$VAULT_PASSWORD_FILE" \
+                              -e "@$VAULT_VARS_FILE" \
+                              -e "deploy_version=${SHORT_COMMIT}" \
+                              -e "image_archive=${WORKSPACE}/shareplate-images-${SHORT_COMMIT}.tar.gz"
+
+                            ansible-playbook \
+                              -i inventory.ini deploy.yml \
+                              --vault-password-file "$VAULT_PASSWORD_FILE" \
+                              -e "@$VAULT_VARS_FILE" \
+                              -e "deploy_version=${SHORT_COMMIT}" \
+                              -e "image_archive=${WORKSPACE}/shareplate-images-${SHORT_COMMIT}.tar.gz"
+                            '''
+                        }
+                    }
                 }
             }
         }

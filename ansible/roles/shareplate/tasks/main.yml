@@ -1,69 +1,103 @@
-# verify Docker exists
+---
 - name: Check Docker installation
-  command: docker --version
+  ansible.builtin.command: docker --version
+  changed_when: false
 
-# Check Docker daemon
-- name: Verify Docker daemon
-  service:
+- name: Check Docker Compose installation
+  ansible.builtin.command: docker compose version
+  changed_when: false
+
+- name: Ensure Docker daemon is running
+  ansible.builtin.service:
     name: docker
     state: started
 
-# Verify project exists
-- name: Verify project directory
-  stat:
+- name: Create SharePlate deployment directory
+  ansible.builtin.file:
     path: "{{ project_directory }}"
-  register: project
+    state: directory
+    mode: "0755"
 
-# Pull the source code to the new cloud server
-- name: Clone project from GitHub
-  git:
-    repo: 'https://25039766-AmirBak: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@github.com/25039766-AmirBak/C270-DevOps-FinalProject.git'
-    dest: "{{ project_directory }}"
-    force: yes
-#Stop containers
-- name: Stop SharePlate
-  command:
-    cmd: "{{ compose_command }} down"
-    chdir: "{{ project_directory }}"
+- name: Create deployment subdirectories
+  ansible.builtin.file:
+    path: "{{ project_directory }}/{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - backend
+    - frontend
 
-# Build containers
-- name: Build latest containers
-  command:
-    cmd: "{{ compose_command }} build"
-    chdir: "{{ project_directory }}"
+- name: Copy deployment Compose file
+  ansible.builtin.copy:
+    src: "{{ playbook_dir }}/../docker-compose.yml"
+    dest: "{{ project_directory }}/{{ compose_file }}"
+    mode: "0644"
 
-# Creates backend .env file
 - name: Create backend environment file
-  template:
+  ansible.builtin.template:
     src: backend.env.j2
     dest: "{{ project_directory }}/backend/.env"
-    mode: '0600'
+    mode: "0600"
+  no_log: true
 
-# CReates frontend .env file
-- name: Create frontend environment file
-  template:
-    src: frontend.env.j2
-    dest: "{{ project_directory }}/frontend/.env"
-    mode: '0600'
+- name: Select the scanned image tag for Compose
+  ansible.builtin.template:
+    src: compose.env.j2
+    dest: "{{ project_directory }}/.env"
+    mode: "0600"
 
-# Start containers
-- name: Start containers
-  command:
-    cmd: "{{ compose_command }} up -d"
+- name: Transfer scanned Docker images to production
+  ansible.builtin.copy:
+    src: "{{ image_archive }}"
+    dest: "{{ remote_image_archive }}"
+    mode: "0600"
+
+- name: Load scanned Docker images
+  ansible.builtin.command:
+    cmd: "docker load --input {{ remote_image_archive }}"
+  register: image_load
+  changed_when: "'Loaded image' in image_load.stdout"
+
+- name: Stop previous SharePlate containers
+  ansible.builtin.command:
+    cmd: "{{ compose_command }} -f {{ compose_file }} down"
     chdir: "{{ project_directory }}"
+  changed_when: true
 
-# Check containers
-- name: Running containers
-  command: docker ps
-  register: containers
+- name: Start containers from scanned images
+  ansible.builtin.command:
+    cmd: "{{ compose_command }} -f {{ compose_file }} up -d --no-build"
+    chdir: "{{ project_directory }}"
+  changed_when: true
 
+- name: Remove transferred image archive
+  ansible.builtin.file:
+    path: "{{ remote_image_archive }}"
+    state: absent
 
-# Display Result
-- debug:
-    var: containers.stdout_lines
-
-# Health Check
-- name: Check frontend
-  uri:
-    url: "{{ shareplate_url }}"
+- name: Wait for SharePlate backend
+  ansible.builtin.uri:
+    url: "{{ backend_health_url }}"
     status_code: 200
+  register: backend_health
+  until: backend_health.status == 200
+  retries: 12
+  delay: 5
+
+- name: Wait for SharePlate frontend
+  ansible.builtin.uri:
+    url: "{{ frontend_health_url }}"
+    status_code: 200
+  register: frontend_health
+  until: frontend_health.status == 200
+  retries: 12
+  delay: 5
+
+- name: Read running containers
+  ansible.builtin.command: docker ps
+  register: containers
+  changed_when: false
+
+- name: Display running containers
+  ansible.builtin.debug:
+    var: containers.stdout_lines

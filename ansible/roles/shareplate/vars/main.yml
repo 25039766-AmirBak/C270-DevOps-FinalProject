@@ -1,12 +1,14 @@
 ---
 project_directory: /root/C270-DevOps-FinalProject
 
-compose_command: docker-compose
+compose_command: docker compose
 
 compose_file: docker-compose.yml
 
-frontend_url: http://localhost:3000
+backend_health_url: http://127.0.0.1:5000
 
-shareplate_url: http://localhost:5000
+frontend_health_url: http://127.0.0.1:3000
 
-port: 5000
+backend_port: 5000
+
+remote_image_archive: "/tmp/shareplate-images-{{ deploy_version }}.tar.gz"
