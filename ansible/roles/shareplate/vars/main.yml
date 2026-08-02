@@ -5,15 +5,9 @@ compose_command: docker compose
 
 compose_file: docker-compose.yml
 
-<<<<<<< HEAD
 backend_health_url: http://127.0.0.1:5000
 
 frontend_health_url: http://127.0.0.1:3000
-=======
-frontend_url: http://157.230.38.201:3000
-
-shareplate_url: http://157.230.38.201:5000
->>>>>>> 87d87af44d2b17bce6f833b18c6af85a3c0825c9
 
 backend_port: 5000
 

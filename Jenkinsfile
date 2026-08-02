@@ -176,27 +176,30 @@ pipeline {
             steps {
                 echo 'Handing off to Ansible for Continuous Deployment...'
                 
-                // Note: Ensure this matches the SSH credential you used in the last successful run (e.g., 'amir' or 'production-server-ssh-key')
-                sshagent(['production-server-ssh-key']) {
-                    
-                    // Securely pull the GitHub PAT from Jenkins vault
-                    withCredentials([string(credentialsId: 'github-pat', variable: 'GIT_PAT')]) {
-                        sh '''
-                        # Disable host key checking so Ansible doesn't get stuck asking "Are you sure you want to connect?"
-                        export ANSIBLE_HOST_KEY_CHECKING=False
-                        
-                        # Navigate into the Ansible directory where the playbook and inventory are located
-                        cd ansible
-                        
-                        # Create a temporary file with the Ansible Vault password to avoid interactive prompts
-                        echo 'vault' > .vault_pass.txt
-                        
-                        # Run the playbook using the password file AND securely inject the GitHub PAT
-                        ansible-playbook -i inventory.ini deploy.yml --vault-password-file .vault_pass.txt -e "git_pat=${GIT_PAT}"
-                        
-                        # Efficiently clean up the password file so it is not left on the system
-                        rm .vault_pass.txt
-                        '''
+                dir('ansible') {
+                    // SSH connects to production. The two secret-file credentials
+                    // provide the encrypted Vault data and its separate password.
+                    sshagent(['production-server-ssh-key']) {
+                        withCredentials([
+                            file(credentialsId: 'ansible-vault-vars', variable: 'VAULT_VARS_FILE'),
+                            file(credentialsId: 'ansible-vault-password', variable: 'VAULT_PASSWORD_FILE')
+                        ]) {
+                            sh '''
+                            ansible-playbook --syntax-check \
+                              -i inventory.ini deploy.yml \
+                              --vault-password-file "$VAULT_PASSWORD_FILE" \
+                              -e "@$VAULT_VARS_FILE" \
+                              -e "deploy_version=${SHORT_COMMIT}" \
+                              -e "image_archive=${WORKSPACE}/shareplate-images-${SHORT_COMMIT}.tar.gz"
+
+                            ansible-playbook \
+                              -i inventory.ini deploy.yml \
+                              --vault-password-file "$VAULT_PASSWORD_FILE" \
+                              -e "@$VAULT_VARS_FILE" \
+                              -e "deploy_version=${SHORT_COMMIT}" \
+                              -e "image_archive=${WORKSPACE}/shareplate-images-${SHORT_COMMIT}.tar.gz"
+                            '''
+                        }
                     }
                 }
             }

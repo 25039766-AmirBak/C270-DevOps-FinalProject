@@ -18,7 +18,6 @@
     state: directory
     mode: "0755"
 
-<<<<<<< HEAD
 - name: Create deployment subdirectories
   ansible.builtin.file:
     path: "{{ project_directory }}/{{ item }}"
@@ -34,22 +33,6 @@
     dest: "{{ project_directory }}/{{ compose_file }}"
     mode: "0644"
 
-=======
-# Pull the source code to the new cloud server
-- name: Clone project from GitHub
-  git:
-    repo: 'https://25039766-AmirBak:{{ git_pat }}@github.com/25039766-AmirBak/C270-DevOps-FinalProject.git'
-    dest: "{{ project_directory }}"
-    version: "feature/global-ui-chatbot"
-    force: yes
-#Stop containers
-- name: Stop SharePlate
-  command:
-    cmd: "{{ compose_command }} down"
-    chdir: "{{ project_directory }}"
-
-# Creates backend .env file
->>>>>>> 87d87af44d2b17bce6f833b18c6af85a3c0825c9
 - name: Create backend environment file
   ansible.builtin.template:
     src: backend.env.j2
@@ -63,7 +46,6 @@
     dest: "{{ project_directory }}/.env"
     mode: "0600"
 
-<<<<<<< HEAD
 - name: Transfer scanned Docker images to production
   ansible.builtin.copy:
     src: "{{ image_archive }}"
@@ -79,18 +61,6 @@
 - name: Stop previous SharePlate containers
   ansible.builtin.command:
     cmd: "{{ compose_command }} -f {{ compose_file }} down"
-=======
-# Build containers
-- name: Build latest containers
-  command:
-    cmd: "{{ compose_command }} build"
-    chdir: "{{ project_directory }}"
-
-# Start containers
-- name: Start containers
-  command:
-    cmd: "{{ compose_command }} up -d"
->>>>>>> 87d87af44d2b17bce6f833b18c6af85a3c0825c9
     chdir: "{{ project_directory }}"
   changed_when: true
 
