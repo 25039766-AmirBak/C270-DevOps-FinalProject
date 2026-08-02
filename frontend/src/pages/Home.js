@@ -30,7 +30,7 @@ const Home = () => {
     useEffect(() => {
         const fetchLiveStats = async () => {
             try {
-                const response = await fetch(`${process.env.REACT_APP_API_URL}/api/stats`);
+                const response = await fetch(`${process.env.REACT_APP_API_URL || ""}/api/stats`);
                 
                 if (!response.ok) {
                     throw new Error("Failed to connect to stats endpoint");
