@@ -19,6 +19,7 @@
   git:
     repo: 'https://25039766-AmirBak:{{ git_pat }}@github.com/25039766-AmirBak/C270-DevOps-FinalProject.git'
     dest: "{{ project_directory }}"
+    version: "feature/global-ui-chatbot"
     force: yes
 #Stop containers
 - name: Stop SharePlate
