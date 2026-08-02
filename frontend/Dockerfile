@@ -7,6 +7,10 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
+
+# Tell Node.js it is allowed to use up to 2GB of memory for the build
+ENV NODE_OPTIONS="--max-old-space-size=2048"
+
 RUN npm run build
 
 

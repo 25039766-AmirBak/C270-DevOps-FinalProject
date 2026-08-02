@@ -5,8 +5,8 @@ compose_command: docker-compose
 
 compose_file: docker-compose.yml
 
-frontend_url: http://localhost:3000
+frontend_url: http://157.230.38.201:3000
 
-shareplate_url: http://localhost:5000
+shareplate_url: http://157.230.38.201:5000
 
 port: 5000
