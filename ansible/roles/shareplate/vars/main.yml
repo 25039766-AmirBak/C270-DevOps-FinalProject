@@ -10,3 +10,5 @@ frontend_url: http://localhost:3000
 shareplate_url: http://localhost:5000
 
 port: 5000
+
+mongo_uri: "mongodb://foodappuser:Food12345@ac-l7dlpv5-shard-00-00.xfgvpuj.mongodb.net:27017,ac-l7dlpv5-shard-00-01.xfgvpuj.mongodb.net:27017,ac-l7dlpv5-shard-00-02.xfgvpuj.mongodb.net:27017/foodDonationDB?ssl=true&replicaSet=atlas-8kn71c-shard-0&authSource=admin&appName=Cluster0"
