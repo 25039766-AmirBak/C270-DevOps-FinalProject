@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        nodejs 'NodeJS'
-    }
-
     environment {
         // React embeds this value during the frontend image build.
         // Update it when the production host or API domain changes.
@@ -70,6 +66,9 @@ pipeline {
          }
 
         stage('Backend Foundation') {
+            tools {
+                nodejs 'NodeJS'
+            }
             steps {
                 dir('backend') {
                     sh 'npm install'
@@ -78,6 +77,9 @@ pipeline {
         }
 
         stage('Frontend Compilation') {
+            tools {
+                nodejs 'NodeJS'
+            }
             steps {
                 dir('frontend') {
                     sh 'npm install'
@@ -87,6 +89,9 @@ pipeline {
         }
 
         stage('Frontend Testing') {
+            tools {
+                nodejs 'NodeJS'
+            }
             steps {
                 dir('frontend') {
                     sh 'CI=true npm test'
@@ -214,7 +219,8 @@ pipeline {
             agent { label 'minikube-windows' }
             options {
                 skipDefaultCheckout()
-                timeout(time: 10, unit: 'MINUTES')
+                retry(2)
+                timeout(time: 20, unit: 'MINUTES')
             }
             steps {
                 unstash "minikube-deployment-${env.SHORT_COMMIT}"
