@@ -1,5 +1,5 @@
 ---
-project_directory: /home/amir/FA/C270-DevOps-FinalProject
+project_directory: /root/C270-DevOps-FinalProject
 
 compose_command: docker-compose
 
