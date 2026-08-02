@@ -27,12 +27,6 @@
     cmd: "{{ compose_command }} down"
     chdir: "{{ project_directory }}"
 
-# Build containers
-- name: Build latest containers
-  command:
-    cmd: "{{ compose_command }} build"
-    chdir: "{{ project_directory }}"
-
 # Creates backend .env file
 - name: Create backend environment file
   template:
@@ -46,6 +40,12 @@
     src: frontend.env.j2
     dest: "{{ project_directory }}/frontend/.env"
     mode: '0600'
+
+# Build containers
+- name: Build latest containers
+  command:
+    cmd: "{{ compose_command }} build"
+    chdir: "{{ project_directory }}"
 
 # Start containers
 - name: Start containers
