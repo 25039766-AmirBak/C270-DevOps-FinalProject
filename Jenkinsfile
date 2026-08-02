@@ -165,23 +165,28 @@ pipeline {
             steps {
                 echo 'Handing off to Ansible for Continuous Deployment...'
                 
+                // Note: Ensure this matches the SSH credential you used in the last successful run (e.g., 'amir' or 'production-server-ssh-key')
                 sshagent(['production-server-ssh-key']) {
-                    sh '''
-                    # Disable host key checking so Ansible doesn't get stuck asking "Are you sure you want to connect?"
-                    export ANSIBLE_HOST_KEY_CHECKING=False
                     
-                    # Navigate into Bakman's new folder
-                    cd ansible
-                    
-                    # Create a temporary file with Bakman's vault password
-                    echo 'vault' > .vault_pass.txt
-                    
-                    # Run the playbook using the password file
-                    ansible-playbook -i inventory.ini deploy.yml --vault-password-file .vault_pass.txt
-                    
-                    # Efficiently clean up the password file so it is not left on the system
-                    rm .vault_pass.txt
-                    '''
+                    // Securely pull the GitHub PAT from Jenkins vault
+                    withCredentials([string(credentialsId: 'github-pat', variable: 'GIT_PAT')]) {
+                        sh '''
+                        # Disable host key checking so Ansible doesn't get stuck asking "Are you sure you want to connect?"
+                        export ANSIBLE_HOST_KEY_CHECKING=False
+                        
+                        # Navigate into the Ansible directory where the playbook and inventory are located
+                        cd ansible
+                        
+                        # Create a temporary file with the Ansible Vault password to avoid interactive prompts
+                        echo 'vault' > .vault_pass.txt
+                        
+                        # Run the playbook using the password file AND securely inject the GitHub PAT
+                        ansible-playbook -i inventory.ini deploy.yml --vault-password-file .vault_pass.txt -e "git_pat=${GIT_PAT}"
+                        
+                        # Efficiently clean up the password file so it is not left on the system
+                        rm .vault_pass.txt
+                        '''
+                    }
                 }
             }
         }
