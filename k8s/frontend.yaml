@@ -12,12 +12,51 @@ spec:
       labels:
         app: shareplate-frontend
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+        fsGroup: 101
+        seccompProfile:
+          type: RuntimeDefault
       containers:
       - name: frontend
         image: shareplate-frontend:latest
         imagePullPolicy: Never
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
         ports:
         - containerPort: 3000
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+      volumes:
+      - name: tmp
+        emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
