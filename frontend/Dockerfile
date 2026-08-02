@@ -11,6 +11,9 @@ ARG REACT_APP_API_URL
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
 
 
+# Tell Node.js it is allowed to use up to 2GB of memory for the build
+ENV NODE_OPTIONS="--max-old-space-size=2048"
+
 RUN npm run build
 
 
