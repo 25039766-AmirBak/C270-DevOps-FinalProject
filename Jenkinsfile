@@ -169,6 +169,11 @@ pipeline {
                   shareplate-frontend:${SHORT_COMMIT} \
                   | gzip > "shareplate-images-${SHORT_COMMIT}.tar.gz"
                 '''
+
+                // Transfer only the scanned images and deployment manifests to
+                // the Windows agent that owns the Minikube cluster.
+                stash name: "minikube-deployment-${env.SHORT_COMMIT}",
+                      includes: "shareplate-images-${env.SHORT_COMMIT}.tar.gz,k8s/*.yaml"
              }
         }
 
@@ -202,6 +207,99 @@ pipeline {
                         }
                     }
                 }
+            }
+        }
+
+        stage('Kubernetes Deployment (Minikube)') {
+            agent { label 'minikube-windows' }
+            options {
+                skipDefaultCheckout()
+                timeout(time: 10, unit: 'MINUTES')
+            }
+            steps {
+                unstash "minikube-deployment-${env.SHORT_COMMIT}"
+
+                powershell '''
+                $ErrorActionPreference = "Stop"
+                $archive = "shareplate-images-$env:SHORT_COMMIT.tar.gz"
+                $backendImage = "shareplate-backend:$env:SHORT_COMMIT"
+                $frontendImage = "shareplate-frontend:$env:SHORT_COMMIT"
+
+                if (-not (Test-Path -LiteralPath $archive)) {
+                    throw "Scanned image archive is missing: $archive"
+                }
+
+                $currentContext = (kubectl config current-context | Out-String).Trim()
+                if ($LASTEXITCODE -ne 0 -or $currentContext -ne "minikube") {
+                    throw "Expected kubectl context 'minikube', found '$currentContext'"
+                }
+
+                minikube status
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Minikube is not ready"
+                }
+
+                docker load --input $archive
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Unable to load the scanned images into Docker Desktop"
+                }
+
+                minikube image load --daemon $backendImage
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Unable to load $backendImage into Minikube"
+                }
+
+                minikube image load --daemon $frontendImage
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Unable to load $frontendImage into Minikube"
+                }
+
+                kubectl get secret backend-secrets
+                if ($LASTEXITCODE -ne 0) {
+                    throw "Kubernetes secret 'backend-secrets' is missing. Follow k8s/README.md."
+                }
+
+                $backendManifest = Join-Path $env:TEMP "shareplate-backend-$env:BUILD_NUMBER.yaml"
+                $frontendManifest = Join-Path $env:TEMP "shareplate-frontend-$env:BUILD_NUMBER.yaml"
+
+                try {
+                    $backendYaml = (Get-Content -LiteralPath "k8s/backend.yaml" -Raw).Replace(
+                        "shareplate-backend:latest",
+                        $backendImage
+                    )
+                    $frontendYaml = (Get-Content -LiteralPath "k8s/frontend.yaml" -Raw).Replace(
+                        "shareplate-frontend:latest",
+                        $frontendImage
+                    )
+
+                    Set-Content -LiteralPath $backendManifest -Value $backendYaml -Encoding utf8
+                    Set-Content -LiteralPath $frontendManifest -Value $frontendYaml -Encoding utf8
+
+                    kubectl apply -f $backendManifest -f $frontendManifest
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "Unable to apply the Kubernetes manifests"
+                    }
+
+                    kubectl rollout status deployment/shareplate-backend --timeout=180s
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "Backend rollout did not complete"
+                    }
+
+                    kubectl rollout status deployment/shareplate-frontend --timeout=180s
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "Frontend rollout did not complete"
+                    }
+
+                    kubectl get pods,services -o wide
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "Unable to read the deployed Kubernetes resources"
+                    }
+                }
+                finally {
+                    Remove-Item -LiteralPath $backendManifest -Force -ErrorAction SilentlyContinue
+                    Remove-Item -LiteralPath $frontendManifest -Force -ErrorAction SilentlyContinue
+                }
+                '''
             }
         }
     }
