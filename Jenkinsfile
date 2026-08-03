@@ -1,10 +1,10 @@
+// Benny, Chevrez
 pipeline {
     agent any
 
     environment {
-        // React embeds this value during the frontend image build.
-        // Update it when the production host or API domain changes.
-        PUBLIC_BACKEND_URL = 'http://157.230.38.201:5000'
+        // Left blank so React uses relative paths, relying on Nginx to proxy requests
+        PUBLIC_BACKEND_URL = ''
     }
 
     stages {
@@ -72,6 +72,18 @@ pipeline {
             steps {
                 dir('backend') {
                     sh 'npm install'
+                }
+            }
+        }
+
+        stage('Backend Testing') {
+            tools {
+                nodejs 'NodeJS'
+            }
+            steps {
+                dir('backend') {
+                    // Executes the test script defined in backend/package.json
+                    sh 'npm test'
                 }
             }
         }
@@ -182,6 +194,8 @@ pipeline {
              }
         }
 
+        // --- PRODUCTION DEPLOYMENT ---
+        // Uses Ansible to deploy containers to the live DigitalOcean Droplet
         stage('Continuous Deployment (CD)') {
             // Tell Ansible to bypass the strict SSH 'yes/no' footprint prompt
             environment {
@@ -220,6 +234,8 @@ pipeline {
             }
         }
 
+        // --- STAGING DEPLOYMENT ---
+        // Deploys the same containers to a local Kubernetes cluster
         stage('Kubernetes Deployment (Minikube)') {
             agent { label 'minikube-windows' }
             options {

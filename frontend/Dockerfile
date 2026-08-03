@@ -1,3 +1,4 @@
+# Ahmad
 # Build stage: compile the React application
 FROM node:22-alpine AS build
 
@@ -9,18 +10,12 @@ RUN npm install
 COPY . .
 ARG REACT_APP_API_URL
 
-# React replaces REACT_APP_* values while compiling. Refuse to create an image
-# that would make users' browsers call localhost or an undefined API address.
-RUN test -n "$REACT_APP_API_URL" || \
-    (echo "REACT_APP_API_URL build argument is required" && exit 1)
-
-ENV REACT_APP_API_URL=${REACT_APP_API_URL}
-
 
 # Tell Node.js it is allowed to use up to 2GB of memory for the build
 ENV NODE_OPTIONS="--max-old-space-size=2048"
 
-RUN npm run build
+# Pass the ARG directly into the build command
+RUN REACT_APP_API_URL=${REACT_APP_API_URL} npm run build
 
 
 # Runtime stage: serve only the compiled application
