@@ -75,6 +75,18 @@ pipeline {
                 }
             }
         }
+        
+        stage('Backend Testing') {
+            tools {
+                nodejs 'NodeJS'
+            }
+            steps {
+                dir('backend') {
+                    // Executes the test script defined in backend/package.json
+                    sh 'npm test'
+                }
+            }
+        }
 
         stage('Frontend Compilation') {
             tools {
