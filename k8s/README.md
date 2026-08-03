@@ -1,3 +1,4 @@
+<!-- Yong Xian -->
 # SharePlate Minikube deployment
 
 The Jenkins stage labelled `minikube-windows` deploys the exact commit-tagged

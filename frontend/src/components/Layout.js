@@ -1,3 +1,4 @@
+// Chevrez
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import AiChatbotWidget from './AiChatbotWidget';
@@ -10,7 +11,7 @@ const Layout = () => {
 
   const navigate = useNavigate();
 
-  // Safely handles both the backend (user.role) and the CA2 Demo Tool (user.roles)
+  // Safely handles both the backend (user.role)
   const rawRole = user?.role || user?.roles || [];
   const activeRoles = Array.isArray(rawRole) ? rawRole : [rawRole];
 

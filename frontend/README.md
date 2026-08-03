@@ -1,3 +1,4 @@
+<!-- Chevrez -->
 # SharePlate - Food Surplus Redistribution Platform
 
 SharePlate is a full-stack web application engineered by LaunchLab Team 1. Our mission is to bridge the gap between food surplus and scarcity in Singapore by connecting food donors directly with beneficiaries and volunteer drivers.
