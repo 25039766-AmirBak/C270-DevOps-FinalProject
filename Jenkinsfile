@@ -183,6 +183,16 @@ pipeline {
         }
 
         stage('Continuous Deployment (CD)') {
+            // 1. Tell Jenkins to load the Ansible tool
+            tools {
+                ansible 'ansible'
+            }
+            
+            // 2. Tell Ansible to bypass the strict SSH 'yes/no' footprint prompt
+            environment {
+                ANSIBLE_HOST_KEY_CHECKING = 'False'
+            }
+            
             steps {
                 echo 'Handing off to Ansible for Continuous Deployment...'
                 
