@@ -71,8 +71,14 @@ describe('SharePlate Comprehensive UI & Logic Tests', () => {
     it('7. should display the correct food name, quantity, and location data on the card', () => {
         render(<DonationTable filteredDonations={mockFilteredDonations} setMessage={jest.fn()} />);
         expect(screen.getByText('Chicken Rice')).toBeInTheDocument();
-        expect(screen.getByText(/Quantity:/i)).toHaveTextContent('5');
-        expect(screen.getByText(/Location:/i)).toHaveTextContent('Ang Mo Kio');
+        
+        // Use getAllByText because there are multiple cards on the screen
+        const quantityLabels = screen.getAllByText(/Quantity:/i);
+        const locationLabels = screen.getAllByText(/Location:/i);
+        
+        // Check the first card (Chicken Rice) which has quantity 5
+        expect(quantityLabels[0]).toHaveTextContent('5');
+        expect(locationLabels[0]).toHaveTextContent('Ang Mo Kio');
     });
 
     it('8. should apply the correct CSS class dynamically based on Available status', () => {
