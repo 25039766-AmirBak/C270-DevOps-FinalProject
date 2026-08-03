@@ -2,9 +2,8 @@ pipeline {
     agent any
 
     environment {
-        // React embeds this value during the frontend image build.
-        // Update it when the production host or API domain changes.
-        PUBLIC_BACKEND_URL = 'http://157.230.38.201:5000'
+        // Left blank so React uses relative paths, relying on Nginx to proxy requests
+        PUBLIC_BACKEND_URL = ''
     }
 
     stages {
@@ -75,7 +74,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Backend Testing') {
             tools {
                 nodejs 'NodeJS'
