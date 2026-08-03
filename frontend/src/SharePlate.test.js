@@ -72,13 +72,12 @@ describe('SharePlate Comprehensive UI & Logic Tests', () => {
         render(<DonationTable filteredDonations={mockFilteredDonations} setMessage={jest.fn()} />);
         expect(screen.getByText('Chicken Rice')).toBeInTheDocument();
         
-        // Use getAllByText because there are multiple cards on the screen
         const quantityLabels = screen.getAllByText(/Quantity:/i);
         const locationLabels = screen.getAllByText(/Location:/i);
         
-        // Check the first card (Chicken Rice) which has quantity 5
-        expect(quantityLabels[0]).toHaveTextContent('5');
-        expect(locationLabels[0]).toHaveTextContent('Ang Mo Kio');
+        // Use .parentElement to read the entire <p> tag instead of just the <strong> tag
+        expect(quantityLabels[0].parentElement).toHaveTextContent('5');
+        expect(locationLabels[0].parentElement).toHaveTextContent('Ang Mo Kio');
     });
 
     it('8. should apply the correct CSS class dynamically based on Available status', () => {
