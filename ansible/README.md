@@ -30,8 +30,8 @@ the password separately as `ansible-vault-password`.
 ## Production SSH setup
 
 The inventory currently connects as `root`, so the Jenkins SSH credential must
-belong to that account. Add the production host key to the Jenkins user's
-`known_hosts`; host-key checking remains enabled.
+belong to that account. To facilitate zero-touch automated deployments, host-key 
+checking is disabled in both `ansible.cfg` and the `Jenkinsfile` environment variables.
 
 The production host must provide Docker Engine and the Docker Compose v2 plugin
 so both `docker` and `docker compose` are available.
