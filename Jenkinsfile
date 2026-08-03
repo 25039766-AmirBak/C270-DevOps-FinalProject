@@ -182,6 +182,8 @@ pipeline {
              }
         }
 
+        // --- PRODUCTION DEPLOYMENT ---
+        // Uses Ansible to deploy containers to the live DigitalOcean Droplet
         stage('Continuous Deployment (CD)') {
             // Tell Ansible to bypass the strict SSH 'yes/no' footprint prompt
             environment {
@@ -220,6 +222,8 @@ pipeline {
             }
         }
 
+        // --- STAGING DEPLOYMENT ---
+        // Deploys the same containers to a local Kubernetes cluster
         stage('Kubernetes Deployment (Minikube)') {
             agent { label 'minikube-windows' }
             options {

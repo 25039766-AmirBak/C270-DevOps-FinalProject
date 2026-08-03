@@ -38,3 +38,5 @@ The current kubectl context must be `minikube`. Jenkins transfers the scanned
 image archive to this agent, loads both images into Docker Desktop and
 Minikube, applies the manifests with the current commit tag, and waits for both
 deployments to finish rolling out.
+
+For academic demonstration purposes, our Jenkins pipeline executes a dual-deployment strategy. First, it uses Ansible to perform a production deployment to a DigitalOcean VM via Docker Compose. Second, it executes a staging deployment to a local Kubernetes (Minikube) cluster to demonstrate advanced orchestration and secret management.

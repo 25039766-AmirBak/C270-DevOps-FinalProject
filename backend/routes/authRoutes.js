@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post('/register', register);
 router.post('/login', login);
-router.get('/profile', auth, getProfile); //unused?
+router.get('/profile', auth, getProfile);
 router.get('/users', auth, admin, getAllUsers);
 router.delete('/users/:userId', auth, admin, deleteUser);
 router.patch('/users/:userId/roles', auth, admin, updateUserRoles);
