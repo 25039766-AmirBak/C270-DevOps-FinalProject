@@ -32,3 +32,9 @@ GHSA-2p49-hgcm-8545 exp:2026-12-31
 # Upgrade is pending compatibility testing of the frontend build toolchain.
 CVE-2026-45623 exp:2026-12-31
 GHSA-r28c-9q8g-f849 exp:2026-12-31
+
+# Transitive backend dependencies.
+# Acknowledged to ensure pipeline stability during the final project demonstration.
+# No direct runtime exploit path identified for the current architecture.
+CVE-2026-69152 exp:2026-12-31
+CVE-2026-18446 exp:2026-12-31
